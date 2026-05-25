@@ -1,5 +1,5 @@
 NAME    	= IRC
-SRC			= src/main.cpp
+SRC			= $(shell find src -name "*.cpp")
 OBJ_DIR		= build
 OBJ			= $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(SRC))
 
