@@ -72,6 +72,9 @@ void Server::run() {
                     buff[nread] = '\0';
                     std::cout << buff << std::endl;
                     continue;
+                } else if (nread < 0) {
+                    _remove_client(fd);
+                    continue;
                 }
             }
         }
