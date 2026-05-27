@@ -32,6 +32,9 @@ class Server {
         void    _init_listening();
         void    _init_epoll();
 
+        void    _accept_client();
+        void    _remove_client(int fd);
+
     public:
         struct IllegalPassword : std::exception {
             public:
