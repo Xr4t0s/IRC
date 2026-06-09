@@ -83,9 +83,9 @@ void Server::run() {
 
 void Server::_init_pass(char *pass) {
     // Mini parsing du password
-    _pass = std::string(pass);
     if (_pass.length() < 8)
         throw IllegalPassword();
+    _pass = std::string(pass);
 }
 
 void Server::_init_port(char *port) {
@@ -105,12 +105,12 @@ void Server::_init_port(char *port) {
 void Server::_init_socket() {
     /*
         La socket côté kernel est une structure configuré de plusieurs manières différentes, protocol, address, type etc...
-        Ici socket renvoie un fd qui communique avec cette structure kernel
+        Ici socket crée une structure kernel, puis renvoie un fd qui communique avec celle-ci
             - AF_INET -> IPv4 pour le type d'addresse
             - SOCK_STREAM -> Stream continu pour le type de socket
             - 0 -> TCP pour le protocol (TCP par déduction IPv4 + SOCK_STREAM => TCP)
         Pour le 3ème paramètre de la fonction socket on pourrait être explicite en remplacant 0 par IPPROTO_TCP de <netinet/in.h> mais 0 fonctionne automatiquement
-        C'est la toute première étape réseau, on a construit une socket réseau dans le kernel
+        C'est la toute première étape réseau, on a construit une socket réseau dans le kernel et récupérer l'entrée de celle-ci
     */
     _fd = socket(AF_INET, SOCK_STREAM, 0);
     if (_fd == -1)
@@ -123,7 +123,7 @@ void Server::_init_socket() {
         -   le fd de la socket -> _fd
         -   le groupe de paramètres concerné -> SOL_SOCKET (paramètres sockets globaux)
         -   un pointeur vers un int contenant le flag
-        -   la longueur de l'int utilisé pour la valeur
+        -   la longueur de la variable utilisé pour la valeur
     */
     int option_value = 1;
     if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &option_value, sizeof(option_value)) == -1) {
@@ -147,8 +147,9 @@ void Server::_init_socket() {
 
 void Server::_init_listening() {
     /*
-        Ici on doit crée une structure sockaddr pour bind
-        mais on va plutôt créer sockaddr_in qui a une structure plus précise qu'on va pouvoir cast en sockaddr
+        Ici aussi on crée une structure kernel "sockaddr" qui détient toutes les infos de l'addresse locale "localhost, 127.0.0.1, ..."
+        afin de lier notre fd a cette structure, et donc utilisé cette "structure addresse"
+        Mais on va plutôt créer sockaddr_in qui a une structure plus précise qu'on va pouvoir downcast en sockaddr
             - AF_INET indique encore une fois une addresse de type IPv4
             - htons(_port) -> little endian to big endian pour les bits du port
             - INADDR_ANY pour que ce soit n'importe quelle addresse (0.0.0.0)
@@ -163,11 +164,12 @@ void Server::_init_listening() {
     }
 
     /*
-        Ici on essaie de bind l'addresse construite précédemment avec le fd de notre socket,
-        la socket étant crée mais reliée a aucune address réseau, ici on fait la connection
-        on précise au kernel que la socket ecoute sur telle addresse avec tel port etc...
-        on précise juste on ne l'a pas encore activée
+        Ici on essaie de bind (lier) la structure addresse construite précédemment avec le fd de notre socket,
+        la socket étant crée mais reliée a aucune addresse réseau, ici on fait la connection
+        on précise au kernel, plus précisement au fd de la socket crée dans _init_socket, que celle-ci ecoute sur telle addresse avec tel port etc...
+        on précise qu'on n'a pas encore activer l'écoute sur cette addresse
         si un paquet TCP arrive sur laddresse, le kernel sait que celle-ci est associé au fd de la socket
+        mais pour l'instant c'est impossible dans qu'on appelle pas listen()
     */
     socklen_t sock_len = sizeof(addr);
     if (bind(_fd, reinterpret_cast<sockaddr*>(&addr), sock_len) == -1) {
@@ -176,7 +178,7 @@ void Server::_init_listening() {
     }
 
     /*
-        Ici on active la socket en la mettant en mode écoute, elle permet alors de recevoir des paquets TCP sur laddress bindée
+        Ici on active l'écoute, elle permet alors de recevoir des paquets TCP sur l'addresse bindée
         SOMAXCONN définit le nombre maximum de connexions en attente
     */
     if (listen(_fd, SOMAXCONN) == -1) {
