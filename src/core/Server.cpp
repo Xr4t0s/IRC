@@ -82,10 +82,14 @@ void Server::run() {
 }
 
 void Server::_init_pass(char *pass) {
+    if (!pass)
+        throw Error("Missing password");
+
+    _pass = std::string(pass);
+    
     // Mini parsing du password
     if (_pass.length() < 8)
         throw Error("Illegal password");
-    _pass = std::string(pass);
 }
 
 void Server::_init_port(char *port) {
