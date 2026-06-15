@@ -12,6 +12,8 @@
     # define MAX_EVENTS 64
 #endif
 
+#include "utils/Error.hpp"
+
 class Server {
     public:
         Server();
@@ -34,27 +36,4 @@ class Server {
 
         void    _accept_client();
         void    _remove_client(int fd);
-
-    public:
-        struct IllegalPassword : std::exception {
-            public:
-                const char* what() const throw();
-        };
-        struct IllegalPort : std::exception {
-            public:
-                const char* what() const throw();
-        };
-        struct SocketError : std::exception {
-            public:
-                const char* what() const throw();
-        };
-        struct ListeningError : std::exception {
-            public:
-                const char* what() const throw();
-        };
-        struct EpollError : std::exception {
-            public:
-                const char* what() const throw();
-        };
-
 };

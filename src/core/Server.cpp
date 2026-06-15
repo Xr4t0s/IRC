@@ -34,7 +34,7 @@ void Server::run() {
         */
         int counts = epoll_wait(_efd, events, MAX_EVENTS, -1);
         if (counts == -1)
-            throw EpollError();
+            throw Error("Epoll error");
 
         for (int i = 0; i < counts; i++) {
             int fd = events[i].data.fd;
@@ -84,7 +84,7 @@ void Server::run() {
 void Server::_init_pass(char *pass) {
     // Mini parsing du password
     if (_pass.length() < 8)
-        throw IllegalPassword();
+        throw Error("Illegal password");
     _pass = std::string(pass);
 }
 
@@ -92,13 +92,13 @@ void Server::_init_port(char *port) {
     // Pareil pour le port
     for (int i = 0; port[i]; i++) {
         if (!isdigit(port[i]))
-            throw IllegalPort();
+            throw Error("Illegal port");
     }
 
     _port = atoi(port);
     // Verifie si pas ports root ou invalide
     if (_port < 1024 || _port > 65535)
-        throw IllegalPort();
+        throw Error("Illegal port");
 }
 
 /// Creation d'une socket aka un pipe reseau, l'autre côté est géré par le kernel
@@ -114,7 +114,7 @@ void Server::_init_socket() {
     */
     _fd = socket(AF_INET, SOCK_STREAM, 0);
     if (_fd == -1)
-        throw SocketError();
+        throw Error("Socket error");
     
     /*
         on a dit que la structure avait des paramètres
@@ -128,7 +128,7 @@ void Server::_init_socket() {
     int option_value = 1;
     if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &option_value, sizeof(option_value)) == -1) {
         close(_fd);
-        throw SocketError();
+        throw Error("Socket error");
     }
 
     /*
@@ -141,7 +141,7 @@ void Server::_init_socket() {
     */
     if (fcntl(_fd, F_SETFL, O_NONBLOCK) == -1) {
         close(_fd);
-        throw SocketError();
+        throw Error("Socket error");
     }
 }
 
@@ -174,7 +174,7 @@ void Server::_init_listening() {
     socklen_t sock_len = sizeof(addr);
     if (bind(_fd, reinterpret_cast<sockaddr*>(&addr), sock_len) == -1) {
         close(_fd);
-        throw ListeningError();
+        throw Error("Listening error");
     }
 
     /*
@@ -183,7 +183,7 @@ void Server::_init_listening() {
     */
     if (listen(_fd, SOMAXCONN) == -1) {
         close(_fd);
-        throw ListeningError();
+        throw Error("Listening error");
     }
 }
 
@@ -202,7 +202,7 @@ void Server::_init_epoll() {
 
    if (_efd == -1) {
        close(_fd);
-       throw EpollError();
+        throw Error("Epoll error");
     }
  
     epoll_event event;
@@ -216,7 +216,7 @@ void Server::_init_epoll() {
     */
     if (epoll_ctl(_efd, EPOLL_CTL_ADD, _fd, &event) == -1) {
         close(_fd);
-        throw EpollError();
+        throw Error("Epoll error");
     }
 }
 
@@ -266,20 +266,4 @@ Server::~Server() {
         close(_efd);
     }
     std::cout << "Server stack destroyed\n";
-}
-
-const char* Server::IllegalPassword::what() const throw() {
-    return "Password should not be less than 8 characters";
-}
-const char* Server::IllegalPort::what() const throw() {
-    return "Port should be between 1024 and 65535";
-}
-const char* Server::SocketError::what() const throw() {
-    return "Failed to create or configure socket";
-}
-const char* Server::ListeningError::what() const throw() {
-    return "Failed to bind or listen server address";
-}
-const char* Server::EpollError::what() const throw() {
-    return "Failed to create or configure epoll";
 }
