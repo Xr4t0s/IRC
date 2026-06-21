@@ -1,6 +1,8 @@
 #pragma once
 
-struct Error {
+#include <exception>
+
+struct Error : std::exception {
     const char* err;
 
     Error(const char* err);
