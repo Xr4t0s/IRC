@@ -1,5 +1,5 @@
 # IRC Server (C++98)
-> *This project has been created as part of the 42 curriculum by nitadros, ...*
+> *This project has been created as part of the 42 curriculum by nitadros, engiacom*
 
 IRC (Internet Relay Chat) is an old text-based communication protocol. It allows users to join and leave discussions, send messages, create channels, and interact with other users in real time.
 
