@@ -260,8 +260,9 @@ void    Server::_accept_client() {
         close(client_fd);
         throw ;
     }
+    
     Client client(client_fd);
-    _clients.insert(std::make_pair<int, Client>(client_fd, client));
+    _clients.insert(std::make_pair(client_fd, client));
 }
 
 void    Server::_remove_client(int fd) {

@@ -7,7 +7,9 @@ void    Client::fillBuffer(char* buff)
     _buff.append(buff);
 
     if (_buff.find("\r\n") != std::string::npos)
-        std::cout << "npos" << std::endl;
+    {
+        // TODO! handle commands
+    }
 }
 
 Client::~Client() {
