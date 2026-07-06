@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <map>
 #include <cstdlib>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -12,6 +13,8 @@
     # define MAX_EVENTS 64
 #endif
 
+#include "core/Client.hpp"
+#include "core/Channel.hpp"
 #include "utils/Error.hpp"
 
 class Server {
@@ -22,11 +25,13 @@ class Server {
         ~Server();
 
     private:
-        int             _fd;
-        std::string     _pass;
-        int             _port;
+        int                             _fd;
+        std::string                     _pass;
+        int                             _port;
+        int                             _efd;
 
-        int             _efd;
+        std::map<int, Client>           _clients;
+        std::map<std::string, Channel>  _channels;
 
         void    _init_pass(char *pass);
         void    _init_port(char *port);
