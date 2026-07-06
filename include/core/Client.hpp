@@ -6,7 +6,7 @@
 class Client {
     private:
         int         _fd;
-        bool        _hasPassword;            
+        bool        _hasPassword;
         bool        _hasUsername;
         
         std::string _name;
@@ -17,7 +17,7 @@ class Client {
         
         Client(int fd);
 
-        void    fillBuffer(const std::string& buff);
+        void    fillBuffer(char* buff);
 
         ~Client();
 };

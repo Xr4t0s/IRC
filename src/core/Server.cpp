@@ -70,7 +70,14 @@ void Server::run() {
                     // Ici on imprime juste mais on doit gérer buffer + command ici
                     // todo! implémenter le parsing
                     buff[nread] = '\0';
+
+                    std::map<int, Client>::iterator client_index = _clients.find(fd);
+                    if (client_index == _clients.end())
+                        throw Error("Server Misunderstood client");
+                    
+                    (*client_index).second.fillBuffer(buff);
                     std::cout << buff << std::endl;
+                    
                     continue;
                 } else if (nread < 0) {
                     _remove_client(fd);
@@ -253,6 +260,8 @@ void    Server::_accept_client() {
         close(client_fd);
         throw ;
     }
+    Client client(client_fd);
+    _clients.insert(std::make_pair<int, Client>(client_fd, client));
 }
 
 void    Server::_remove_client(int fd) {
@@ -260,6 +269,7 @@ void    Server::_remove_client(int fd) {
     epoll_ctl(_efd, EPOLL_CTL_DEL, fd, NULL);
     // On close le fd concerné et on continue notre boucle normalement
     close(fd);
+    _clients.erase(fd);
 }
 
 Server::~Server() {
