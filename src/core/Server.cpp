@@ -71,11 +71,11 @@ void Server::run() {
                     // todo! implémenter le parsing
                     buff[nread] = '\0';
 
-                    std::map<int, Client>::iterator client_index = _clients.find(fd);
-                    if (client_index == _clients.end())
+                    Client* client = this->getClientByFd(fd);
+                    if (!client)
                         throw Error("Server Misunderstood client");
-                    
-                    (*client_index).second.fillBuffer(buff);
+                        
+                    client->fillBuffer(buff);
                     std::cout << buff << std::endl;
                     
                     continue;

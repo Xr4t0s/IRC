@@ -6,9 +6,12 @@ void    Client::fillBuffer(char* buff)
 {
     _buff.append(buff);
 
-    if (_buff.find("\r\n") != std::string::npos)
+    size_t index = _buff.find("\r\n");
+
+    if (index != std::string::npos)
     {
-        // TODO! handle commands
+        // _hasCompleteCommand = true;
+        _buff = _buff.substr(index + 2, _buff.length());
     }
 }
 
