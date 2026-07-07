@@ -1,5 +1,12 @@
 #include "core/Server.hpp"
 
+extern volatile sig_atomic_t g_running;
+
+void    sig_handler(int code) {
+    static_cast<void>(code);
+    g_running = 0;
+}
+
 int main(int ac, char **av) {
     
     if (ac != 3) {
@@ -8,6 +15,8 @@ int main(int ac, char **av) {
     }    
 
     Server serv;
+    
+    signal(SIGINT, sig_handler);
 
     if (!serv.init(++av))
         return 1;
