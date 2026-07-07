@@ -1,5 +1,7 @@
 #include "core/Server.hpp"
 
+volatile sig_atomic_t g_running = 1;
+
 Server::Server() : _fd(-1), _port(-1), _efd(-1), _cmdHandler(*this) {}
 
 bool Server::init(char **args) {
@@ -24,7 +26,7 @@ void Server::run() {
     // Ici on crée une liste d'events qu'epoll remplira automatiquement pour chaque évènement de taille MAX_EVENTS
     epoll_event events[MAX_EVENTS];
 
-    while(true) {
+    while(g_running) {
         /*
             Ici epoll_wait permet d'attendre des events des éléments ajouté à la watchlist avec epoll_ctl
                 - _efd -> epoll fd car cest une fd
@@ -33,7 +35,7 @@ void Server::run() {
                 - -1 pour infini
         */
         int counts = epoll_wait(_efd, events, MAX_EVENTS, -1);
-        if (counts == -1)
+        if (counts == -1 && errno != EINTR)
             throw Error("Epoll error");
 
         for (int i = 0; i < counts; i++) {

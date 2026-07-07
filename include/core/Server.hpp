@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <sys/epoll.h>
+#include <signal.h>
 
 #ifndef MAX_EVENTS
     # define MAX_EVENTS 64
@@ -22,8 +23,8 @@ class Server {
     public:
         Server();
         
-        bool    init(char **args);
-        void    run();
+        bool        init(char **args);
+        void        run();
 
         Channel*    getChannelByName(const std::string& name);
         Client*     getClientByFd(int fd);
