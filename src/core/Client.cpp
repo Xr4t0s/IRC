@@ -1,6 +1,6 @@
 #include <core/Client.hpp>
 
-Client::Client(int fd) : _fd(fd), _hasPassword(false), _hasUsername(false), registered(false) {}
+Client::Client(int fd) : _fd(fd), _hasPassword(false), _hasUsername(false), registered(false), hasCompleteCmd(false) {}
 
 void    Client::fillBuffer(char* buff)
 {
@@ -10,8 +10,9 @@ void    Client::fillBuffer(char* buff)
 
     if (index != std::string::npos)
     {
-        // _hasCompleteCommand = true;
-        _buff = _buff.substr(index + 2, _buff.length());
+        this->hasCompleteCmd = true;
+        this->command = _buff.substr(0, index);
+        this->_buff = _buff.substr(index + 2, _buff.length());
     }
 }
 

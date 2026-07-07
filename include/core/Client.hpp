@@ -13,7 +13,9 @@ class Client {
         std::string _buff;
 
     public:
-        bool        registered;        
+        bool        registered;      
+        bool        hasCompleteCmd;
+        std::string command;      
         
         Client(int fd);
 

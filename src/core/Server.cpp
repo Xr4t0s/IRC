@@ -1,6 +1,6 @@
 #include "core/Server.hpp"
 
-Server::Server() : _fd(-1), _port(-1), _efd(-1) {}
+Server::Server() : _fd(-1), _port(-1), _efd(-1), _cmdHandler(*this) {}
 
 bool Server::init(char **args) {
     std::cout << "Server stack created\n";
@@ -76,6 +76,9 @@ void Server::run() {
                         throw Error("Server Misunderstood client");
                         
                     client->fillBuffer(buff);
+                    if (client->hasCompleteCmd)
+                        _cmdHandler.execute(*client, parseCommand(client->command));
+                    
                     std::cout << buff << std::endl;
                     
                     continue;
