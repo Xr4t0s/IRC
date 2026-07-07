@@ -2,13 +2,15 @@
 
 #include <iostream>
 #include <map>
+#include <vector>
 
 #include "core/Server.hpp"
+#include "core/Client.hpp"
 
 struct Command {
     std::string prefix;
     std::string command;
-    std::string params;
+    std::vector<std::string> params;
 };
 
 class CommandHandler {
@@ -31,4 +33,4 @@ class CommandHandler {
         ~CommandHandler();
 };
 
-Command parseCommand(const char* str);
+Command parseCommand(const std::string& str);

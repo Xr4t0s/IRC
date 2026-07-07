@@ -11,6 +11,10 @@ CommandHandler::CommandHandler(Server& server) : _server(server) {
 void CommandHandler::execute(Client& client, const Command& cmd) {
     static_cast<void>(client);
     static_cast<void>(cmd);
+
+    // dans l'idée 
+    Handler h = _cmds[cmd.command];
+    (this->*h)(client, cmd);
 }
 
 CommandHandler::~CommandHandler() {}
