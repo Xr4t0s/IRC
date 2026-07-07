@@ -13,13 +13,13 @@ class Client {
         std::string _buff;
 
     public:
-        bool        registered;      
-        bool        hasCompleteCmd;
-        std::string command;      
+        bool        registered;
         
         Client(int fd);
 
-        void    fillBuffer(char* buff);
-
+        void        fillBuffer(char* buff);
+        bool        hasCompleteCommand() const;
+        std::string extractCommand();
+        
         ~Client();
 };
