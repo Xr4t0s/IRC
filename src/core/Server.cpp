@@ -88,6 +88,26 @@ void Server::run() {
     }
 }
 
+Channel* Server::getChannelByName(const std::string& name) {
+    std::map<std::string, Channel>::iterator it = _channels.find(name);
+
+    if (it != _channels.end()) {
+        return &(*it).second;
+    }
+
+    return NULL;
+}
+
+Client* Server::getClientByFd(int fd) {
+    std::map<int, Client>::iterator it = _clients.find(fd);
+
+    if (it != _clients.end()) {
+        return &(*it).second;
+    }
+
+    return NULL;
+}
+
 void Server::_init_pass(char *pass) {
     if (!pass)
         throw Error("Missing password");
