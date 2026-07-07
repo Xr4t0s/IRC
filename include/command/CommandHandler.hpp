@@ -4,14 +4,10 @@
 #include <map>
 #include <vector>
 
-#include "core/Server.hpp"
 #include "core/Client.hpp"
+#include "command/Command.hpp"
 
-struct Command {
-    std::string prefix;
-    std::string command;
-    std::vector<std::string> params;
-};
+class Server;
 
 class CommandHandler {
     private:

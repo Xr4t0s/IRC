@@ -12,8 +12,11 @@ void CommandHandler::execute(Client& client, const Command& cmd) {
     static_cast<void>(client);
     static_cast<void>(cmd);
 
-    // dans l'idée 
-    Handler h = _cmds[cmd.command];
+    // dans l'idée
+
+    Handler h = (*_cmds.find(cmd.command)).second;
+    if (!h) return; // TODO! if (!h) h = ERR_UNKNOWNCOMMAND 421
+
     (this->*h)(client, cmd);
 }
 
@@ -38,13 +41,4 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
 void CommandHandler::_quit(Client& client, const Command& cmd) {
     static_cast<void>(client);
     static_cast<void>(cmd);
-}
-
-
-// L'idée ici c'est que Command::command == soit NICK soit PASS soit... etc, et on fera tout simplement _cmds[cmd.command]
-Command parseCommand(const std::string& str) {
-    static_cast<void>(str);
-    
-    // TODO! create command here
-    return Command();
 }
