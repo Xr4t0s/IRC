@@ -20,8 +20,13 @@
 class Server {
     public:
         Server();
+        
         bool    init(char **args);
         void    run();
+
+        Channel*    getChannelByName(const std::string& name);
+        Client*     getClientByFd(int fd);
+
         ~Server();
 
     private:
