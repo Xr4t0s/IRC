@@ -25,5 +25,10 @@ class CommandHandler {
 
     public:
         CommandHandler(Server& server);
+
+        void execute(Client& client, const Command& cmd);
+
         ~CommandHandler();
 };
+
+Command parseCommand(const char* str);
