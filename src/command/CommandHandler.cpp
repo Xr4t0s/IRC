@@ -9,14 +9,11 @@ CommandHandler::CommandHandler(Server& server) : _server(server) {
 }
 
 void CommandHandler::execute(Client& client, const Command& cmd) {
-    static_cast<void>(client);
-    static_cast<void>(cmd);
+    std::map<std::string, CommandHandler::Handler>::iterator it = _cmds.find(cmd.command);
 
-    // dans l'idée
+    if (it == _cmds.end()) return; // TODO! if (!h) h = ERR_UNKNOWNCOMMAND 421
 
-    Handler h = (*_cmds.find(cmd.command)).second;
-    if (!h) return; // TODO! if (!h) h = ERR_UNKNOWNCOMMAND 421
-
+    Handler h = (*it).second;
     (this->*h)(client, cmd);
 }
 
