@@ -76,8 +76,8 @@ void Server::run() {
                         throw Error("Server Misunderstood client");
                         
                     client->fillBuffer(buff);
-                    if (client->hasCompleteCmd)
-                        _cmdHandler.execute(*client, parseCommand(client->command));
+                    while (client->hasCompleteCommand())
+                        _cmdHandler.execute(*client, parseCommand(client->extractCommand()));
                     
                     std::cout << buff << std::endl;
                     
