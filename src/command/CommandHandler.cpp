@@ -17,11 +17,6 @@ CommandHandler::~CommandHandler() {}
 
 void CommandHandler::_pass(Client& client, const Command& cmd) {
     static_cast<void>(client);
-
-    // Dans l'idée
-    Handler h = _cmds["PASS"];
-    (this->*h)(client, cmd);
-    
     static_cast<void>(cmd);
 }
 void CommandHandler::_nick(Client& client, const Command& cmd) {
@@ -43,9 +38,9 @@ void CommandHandler::_quit(Client& client, const Command& cmd) {
 
 
 // L'idée ici c'est que Command::command == soit NICK soit PASS soit... etc, et on fera tout simplement _cmds[cmd.command]
-Command parseCommand(const char* str) {
+Command parseCommand(const std::string& str) {
     static_cast<void>(str);
     
-    // TODO! create command parser here
+    // TODO! create command here
     return Command();
 }
