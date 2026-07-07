@@ -10,8 +10,23 @@ CommandHandler::CommandHandler(Server& server) : _server(server) {
 
 CommandHandler::~CommandHandler() {}
 
-void CommandHandler::_pass(Client& client, const Command& cmd) {}
-void CommandHandler::_nick(Client& client, const Command& cmd) {}
-void CommandHandler::_user(Client& client, const Command& cmd) {}
-void CommandHandler::_join(Client& client, const Command& cmd) {}
-void CommandHandler::_quit(Client& client, const Command& cmd) {}
+void CommandHandler::_pass(Client& client, const Command& cmd) {
+    static_cast<void>(client);
+    static_cast<void>(cmd);
+}
+void CommandHandler::_nick(Client& client, const Command& cmd) {
+    static_cast<void>(client);
+    static_cast<void>(cmd);
+}
+void CommandHandler::_user(Client& client, const Command& cmd) {
+    static_cast<void>(client);
+    static_cast<void>(cmd);
+}
+void CommandHandler::_join(Client& client, const Command& cmd) {
+    static_cast<void>(client);
+    static_cast<void>(cmd);
+}
+void CommandHandler::_quit(Client& client, const Command& cmd) {
+    static_cast<void>(client);
+    static_cast<void>(cmd);
+}
