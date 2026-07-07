@@ -17,6 +17,11 @@ CommandHandler::~CommandHandler() {}
 
 void CommandHandler::_pass(Client& client, const Command& cmd) {
     static_cast<void>(client);
+
+    // Dans l'idée
+    Handler h = _cmds["PASS"];
+    (this->*h)(client, cmd);
+    
     static_cast<void>(cmd);
 }
 void CommandHandler::_nick(Client& client, const Command& cmd) {
@@ -42,4 +47,5 @@ Command parseCommand(const char* str) {
     static_cast<void>(str);
     
     // TODO! create command parser here
+    return Command();
 }
