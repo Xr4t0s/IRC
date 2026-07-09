@@ -24,7 +24,7 @@ Regroupé par phase, dans l'ordre logique d'implémentation.
 - [x] `accept` nouveaux clients + ajout watchlist
 - [x] Suppression client (`EPOLL_CTL_DEL`, `close`, erase de la map)
 - [x] Gestion signal `SIGINT` (`g_running` en `volatile sig_atomic_t`)
-- [ ] Gérer `EINTR` : `epoll_wait` renvoie -1 au Ctrl+C → ne pas traiter comme
+- [x] Gérer `EINTR` : `epoll_wait` renvoie -1 au Ctrl+C → ne pas traiter comme
       une erreur fatale (sortir proprement via `g_running`)
 
 ## Phase 2 — Réception / bufferisation
@@ -41,11 +41,11 @@ Regroupé par phase, dans l'ordre logique d'implémentation.
 - [x] `execute()` avec `find()` (pas d'insertion parasite)
 - [x] Forward declaration `Server`/`Client` (casser le cycle d'include)
 - [~] `parseCommand()` : ligne IRC → `Command` (voir `docs/PARSING.md`)
-  - [ ] Extraction préfixe optionnel (`:` en début de ligne)
-  - [ ] Extraction commande
-  - [ ] Middle params
-  - [ ] Trailing (`:` en début de param, espaces préservés)
-  - [ ] Cas limites : trailing vide, `:` littéral, ligne vide
+  - [x] Extraction préfixe optionnel (`:` en début de ligne)
+  - [x] Extraction commande
+  - [x] Middle params
+  - [x] Trailing (`:` en début de param, espaces préservés)
+  - [x] Cas limites : trailing vide, `:` littéral, ligne vide
 
 ## Phase 4 — Chemin d'envoi (réponses)
 
