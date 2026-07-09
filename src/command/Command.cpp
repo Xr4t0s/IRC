@@ -34,6 +34,15 @@ Command parseCommand(const std::string& str) {
             return cmd;
         }
         cmd.command = str.substr(i, space - i);
+
+        std::string command = str.substr(i, space - i);
+        size_t      commandSize = command.length();
+
+        cmd.command.resize(commandSize);
+        
+        for (size_t i = 0; i < commandSize; i++)
+            cmd.command[i] = std::toupper(command.at(i));
+
         i = space;
     }
 
