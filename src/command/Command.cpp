@@ -62,22 +62,5 @@ Command parseCommand(const std::string& str) {
         i = space;
     }
 
-    std::cout << "[CMD] Command parsed" << std::endl <<
-        "Prefix: " << cmd.prefix << std::endl <<
-        "Command: " << cmd.command << std::endl << 
-        "Params: ";
-    
-    std::vector<std::string>::iterator it = cmd.params.begin();
-    std::vector<std::string>::iterator ite = cmd.params.end();
-
-    while (it != ite) {
-        std::cout << *it;
-        it++;
-        if (it != ite)
-            std::cout << ", ";
-        else
-            std::cout << "." << std::endl;
-    }
-
     return cmd;
 }
