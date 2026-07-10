@@ -1,4 +1,10 @@
 #include "command/CommandHandler.hpp"
+#include "core/Server.hpp"
+
+static const char *ERR_NEEDMOREPARAMS = "461 ERR_NEEDMOREPARAMS";
+static const char *ERR_PASSWDMISMATCH = "464 ERR_PASSWDMISMATCH";
+static const char *ERR_ALREADYREGISTRED = "462 ERR_ALREADYREGISTRED";
+
 
 CommandHandler::CommandHandler(Server& server) : _server(server) {
     _cmds["PASS"] = &CommandHandler::_pass;
@@ -20,12 +26,28 @@ void CommandHandler::execute(Client& client, const Command& cmd) {
 CommandHandler::~CommandHandler() {}
 
 void CommandHandler::_pass(Client& client, const Command& cmd) {
-    static_cast<void>(client);
-    static_cast<void>(cmd);
+    if (client.registered == true)
+    {
+        client.fillBuffer(ERR_ALREADYREGISTRED, OUTPUT);
+        return;
+    }
+    if (cmd.params.size() != 1)
+    {
+        client.fillBuffer(ERR_NEEDMOREPARAMS, OUTPUT);
+        return;
+    }
+    if (!cmd.params[0].compare(_server.getPassword()))
+        client.registered = true;
+    else
+        client.fillBuffer(ERR_PASSWDMISMATCH, OUTPUT);
 }
 void CommandHandler::_nick(Client& client, const Command& cmd) {
-    static_cast<void>(client);
-    static_cast<void>(cmd);
+
+
+
+
+
+
 }
 void CommandHandler::_user(Client& client, const Command& cmd) {
     static_cast<void>(client);

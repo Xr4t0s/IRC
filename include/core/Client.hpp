@@ -9,15 +9,17 @@ class Client {
         bool        _hasPassword;
         bool        _hasUsername;
         
-        std::string _name;
-        std::string _buff;
+        std::string _nick;
+        std::string _user;
+        std::string _inBuff;
+        std::string _outBuff;
 
     public:
         bool        registered;
         
         Client(int fd);
 
-        void        fillBuffer(char* buff);
+        void        fillBuffer(const char* buff, bool io);
         bool        hasCompleteCommand() const;
         std::string extractCommand();
         

@@ -7,6 +7,9 @@
 #include "core/Client.hpp"
 #include "command/Command.hpp"
 
+#define OUTPUT 0
+#define INPUT 1
+
 class Server;
 
 class CommandHandler {

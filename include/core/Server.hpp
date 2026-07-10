@@ -28,6 +28,7 @@ class Server {
 
         Channel*    getChannelByName(const std::string& name);
         Client*     getClientByFd(int fd);
+        const std::string& getPassword() const;
 
         ~Server();
 

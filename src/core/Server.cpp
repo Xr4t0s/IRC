@@ -77,7 +77,7 @@ void Server::run() {
                     if (!client)
                         throw Error("Server Misunderstood client");
                         
-                    client->fillBuffer(buff);
+                    client->fillBuffer(buff, 1);
                     while (client->hasCompleteCommand())
                         _cmdHandler.execute(*client, parseCommand(client->extractCommand()));
                     
@@ -288,6 +288,11 @@ void    Server::_accept_client() {
     
     Client client(client_fd);
     _clients.insert(std::make_pair(client_fd, client));
+}
+
+const std::string& Server::getPassword() const
+{
+    return _pass;
 }
 
 void    Server::_remove_client(int fd) {
