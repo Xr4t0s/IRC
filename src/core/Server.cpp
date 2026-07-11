@@ -290,6 +290,16 @@ void    Server::_accept_client() {
     _clients.insert(std::make_pair(client_fd, client));
 }
 
+bool Server::nickExists(const std::string& nick) const
+{
+    for (std::map<int, Client>::const_iterator it = _clients.begin(); it != _clients.end(); ++it)
+    {
+        if (it->second.getNick() == nick)
+            return true;
+    }
+    return false;
+}
+
 const std::string& Server::getPassword() const
 {
     return _pass;

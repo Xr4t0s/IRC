@@ -28,6 +28,7 @@ class Server {
 
         Channel*    getChannelByName(const std::string& name);
         Client*     getClientByFd(int fd);
+        bool        nickExists(const std::string& nick) const;
         const std::string& getPassword() const;
 
         ~Server();

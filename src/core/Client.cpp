@@ -1,6 +1,6 @@
 #include <core/Client.hpp>
 
-Client::Client(int fd) : _fd(fd), _hasPassword(false), _hasUsername(false), registered(false) {}
+Client::Client(int fd) : _fd(fd), _hasPassword(false), _hasUsername(false), _hasNick(false), registered(false) {}
 
 void    Client::fillBuffer(const char* buff, bool io) {
     if (io == false)// Output
@@ -24,6 +24,26 @@ bool    Client::hasCompleteCommand() const {
         return true;
 
     return false;
+}
+
+const std::string& Client::getNick() const
+{
+    return _nick;
+}
+
+void Client::setNick(std::string newNick)
+{
+    _nick = newNick;
+}
+
+const std::string& Client::getUser() const
+{
+    return _user;
+}
+
+void Client::setUser(std::string newUser)
+{
+    _user = newUser;
 }
 
 std::string Client::extractCommand() {
