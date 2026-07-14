@@ -21,98 +21,6 @@ bool Server::init(char **args) {
     return true;
 }
 
-void Server::run() {
-
-    // Ici on crée une liste d'events qu'epoll remplira automatiquement pour chaque évènement de taille MAX_EVENTS
-    epoll_event events[MAX_EVENTS];
-
-    while(g_running) {
-        /*
-            Ici epoll_wait permet d'attendre des events des éléments ajouté à la watchlist avec epoll_ctl
-                - _efd -> epoll fd car cest une fd
-                - events -> structure d'éléments à watch
-                - nombre d'event max
-                - -1 pour infini
-        */
-        int counts = epoll_wait(_efd, events, MAX_EVENTS, -1);
-        if (counts == -1 && errno != EINTR)
-            throw Error("Epoll error");
-
-        for (int i = 0; i < counts; i++) {
-            int fd = events[i].data.fd;
-
-            
-            // Si le fd concerné est notre serveur alors nous avons un nouveau client à gérer
-            if (fd == _fd) {
-                std::cout << "New connection\n";
-                try {
-                    _accept_client();
-                } catch (std::exception& e) {
-                    static_cast<void>(e);
-                }
-            }
-
-            /*
-                Sinon c'est un des fd clients qui envoie un event,
-                c'est ici qu'on traite msg et commande comme KICK etc on doit parse plus bas
-            */
-            else {
-                // on crée un buffer pour recv
-                // todo! mettre un #define CLIENT_BUFFER <uint>
-                char buff[512 + 1];
-
-                // On lit depuis le fd
-                int nread = recv(fd, buff, 512, 0);
-                if (nread == 0) {
-                    // Si aucun bytes lu mais message correct -> fin de connexion
-                    std::cout << "Removed client" << std::endl;
-                    _remove_client(fd);
-                    continue;
-                } else if (nread > 0) {
-                    // Ici on imprime juste mais on doit gérer buffer + command ici
-                    // todo! implémenter le parsing
-                    buff[nread] = '\0';
-
-                    Client* client = this->getClientByFd(fd);
-                    if (!client)
-                        throw Error("Server Misunderstood client");
-                        
-                    client->fillBuffer(buff, 1);
-                    while (client->hasCompleteCommand())
-                        _cmdHandler.execute(*client, parseCommand(client->extractCommand()));
-                    
-                    std::cout << buff << std::endl;
-                    
-                    continue;
-                } else if (nread < 0) {
-                    _remove_client(fd);
-                    continue;
-                }
-            }
-        }
-    }
-}
-
-Channel* Server::getChannelByName(const std::string& name) {
-    std::map<std::string, Channel>::iterator it = _channels.find(name);
-
-    if (it != _channels.end()) {
-        return &(*it).second;
-    }
-
-    return NULL;
-}
-
-Client* Server::getClientByFd(int fd) {
-    std::map<int, Client>::iterator it = _clients.find(fd);
-
-    if (it != _clients.end()) {
-        return &(*it).second;
-    }
-
-    return NULL;
-}
-
 void Server::_init_pass(char *pass) {
     if (!pass)
         throw Error("Missing password");
@@ -256,6 +164,119 @@ void Server::_init_epoll() {
     }
 }
 
+void Server::run() {
+
+    // Ici on crée une liste d'events qu'epoll remplira automatiquement pour chaque évènement de taille MAX_EVENTS
+    epoll_event events[MAX_EVENTS];
+
+    while(g_running) {
+        /*
+            Ici epoll_wait permet d'attendre des events des éléments ajouté à la watchlist avec epoll_ctl
+                - _efd -> epoll fd car cest une fd
+                - events -> structure d'éléments à watch
+                - nombre d'event max
+                - -1 pour infini
+        */
+        int counts = epoll_wait(_efd, events, MAX_EVENTS, -1);
+        if (counts == -1 && errno != EINTR)
+            throw Error("Epoll error");
+
+        for (int i = 0; i < counts; i++) {
+            int fd = events[i].data.fd;
+
+            
+            // Si le fd concerné est notre serveur alors nous avons un nouveau client à gérer
+            if (fd == _fd) {
+                std::cout << "New connection\n";
+                try {
+                    _accept_client();
+                } catch (std::exception& e) {
+                    static_cast<void>(e);
+                }
+            }
+
+            /*
+                Sinon c'est un des fd clients qui envoie un event,
+                c'est ici qu'on traite msg et commande comme KICK etc on doit parse plus bas
+            */
+            else {
+                // on crée un buffer pour recv
+                // todo! mettre un #define CLIENT_BUFFER <uint>
+                char buff[512 + 1];
+
+                // On lit depuis le fd
+                int nread = recv(fd, buff, 512, 0);
+                if (nread == 0) {
+                    // Si aucun bytes lu mais message correct -> fin de connexion
+                    std::cout << "Removed client" << std::endl;
+                    _remove_client(fd);
+                    continue;
+                } else if (nread > 0) {
+                    // Ici on imprime juste mais on doit gérer buffer + command ici
+                    // todo! implémenter le parsing
+                    buff[nread] = '\0';
+
+                    Client* client = this->getClientByFd(fd);
+                    if (!client)
+                        throw Error("Server Misunderstood client");
+                        
+                    client->fillInBuffer(buff);
+                    while (client->hasCompleteCommand())
+                        _cmdHandler.execute(*client, parseCommand(client->extractCommand()));
+                    
+                    std::cout << buff << std::endl;
+                    
+                    continue;
+                } else if (nread < 0) {
+                    _remove_client(fd);
+                    continue;
+                }
+            }
+        }
+    }
+}
+
+const std::string& Server::getPassword() const
+{
+    return _pass;
+}
+
+Client* Server::getClientByFd(int fd) {
+    std::map<int, Client>::iterator it = _clients.find(fd);
+
+    if (it != _clients.end()) {
+        return &(*it).second;
+    }
+
+    return NULL;
+}
+
+Client*     Server::getClientByNick(std::string nick) {
+    std::map<int, Client>::iterator it = _clients.begin();
+
+    std::string tmp;
+
+    while (it != _clients.end())
+    {
+        tmp = (*it).second.getNick();
+        if (tmp == nick)
+            return &(*it).second;
+        it++;
+    }
+
+    return NULL;
+}
+
+Channel* Server::getChannelByName(const std::string& name) {
+    std::map<std::string, Channel>::iterator it = _channels.find(name);
+
+    if (it != _channels.end()) {
+        return &(*it).second;
+    }
+
+    return NULL;
+}
+
 void    Server::_accept_client() {
     // On crée laddress du client comme pour notre serveur
     sockaddr_in addr;
@@ -288,21 +309,6 @@ void    Server::_accept_client() {
     
     Client client(client_fd);
     _clients.insert(std::make_pair(client_fd, client));
-}
-
-bool Server::nickExists(const std::string& nick) const
-{
-    for (std::map<int, Client>::const_iterator it = _clients.begin(); it != _clients.end(); ++it)
-    {
-        if (it->second.getNick() == nick)
-            return true;
-    }
-    return false;
-}
-
-const std::string& Server::getPassword() const
-{
-    return _pass;
 }
 
 void    Server::_remove_client(int fd) {

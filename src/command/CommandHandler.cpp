@@ -12,7 +12,6 @@ static const char *ERR_NONICKNAMEGIVEN  = "431 ERR_NONICKNAMEGIVEN";
 static const char *ERR_NICKNAMEINUSE    = "433 ERR_NICKNAMEINUSE";
 // static const char *ERR_NICKCOLLISION    = "436 ERR_NICKCOLLISION";// not use for now
 
-
 CommandHandler::CommandHandler(Server& server) : _server(server) {
     _cmds["PASS"] = &CommandHandler::_pass;
     _cmds["NICK"] = &CommandHandler::_nick;
@@ -30,25 +29,23 @@ void CommandHandler::execute(Client& client, const Command& cmd) {
     (this->*h)(client, cmd);
 }
 
-CommandHandler::~CommandHandler() {}
-
 void CommandHandler::_pass(Client& client, const Command& cmd) {
     if (client.registered == true)
     {
-        client.fillBuffer(ERR_ALREADYREGISTRED, OUTPUT);
+        client.fillOutBuffer(ERR_ALREADYREGISTRED);
         return;
     }
 
     if (cmd.params.size() < 1)
     {
-        client.fillBuffer(ERR_NEEDMOREPARAMS, OUTPUT);
+        client.fillOutBuffer(ERR_NEEDMOREPARAMS);
         return;
     }
 
     if (!cmd.params[0].compare(_server.getPassword()))
         client._hasPassword = true;
     else
-        client.fillBuffer(ERR_PASSWDMISMATCH, OUTPUT);
+        client.fillOutBuffer(ERR_PASSWDMISMATCH);
     
     if (client._hasNick && client._hasUsername && client._hasPassword)
         client.registered = true;
@@ -57,17 +54,17 @@ void CommandHandler::_nick(Client& client, const Command& cmd) {
 
     if (cmd.params.size() < 1 || cmd.params[0].empty() == true)
     {
-        client.fillBuffer(ERR_NONICKNAMEGIVEN, OUTPUT);
+        client.fillOutBuffer(ERR_NONICKNAMEGIVEN);
         return;
     }
-    if (_server.nickExists(cmd.params[0]))
+    if (_server.getClientByNick(cmd.params[0]) != NULL)
     {
-        client.fillBuffer(ERR_NICKNAMEINUSE, OUTPUT); // Or ERR_NICKCOLLISION don't know which one to use.
+        client.fillOutBuffer(ERR_NICKNAMEINUSE); // Or ERR_NICKCOLLISION don't know which one to use.
         return;
     }
 
     // TODO: if ( nick has invalid/not compatible characters)
-    // fillBuffer( ERR_ERRONEUSNICKNAME )
+    // fillOutBuffer( ERR_ERRONEUSNICKNAME )
     
     client.setNick(cmd.params[0]);
     std::cout << client.getNick() << std::endl;// console log
@@ -78,12 +75,12 @@ void CommandHandler::_nick(Client& client, const Command& cmd) {
 void CommandHandler::_user(Client& client, const Command& cmd) {
     if (client.registered == true)
     {
-        client.fillBuffer(ERR_ALREADYREGISTRED, OUTPUT);
+        client.fillOutBuffer(ERR_ALREADYREGISTRED);
         return;
     }
     if (cmd.params.size() < 1)
     {
-        client.fillBuffer(ERR_NEEDMOREPARAMS, OUTPUT);
+        client.fillOutBuffer(ERR_NEEDMOREPARAMS);
         return;
     }
 
@@ -103,3 +100,5 @@ void CommandHandler::_quit(Client& client, const Command& cmd) {
     static_cast<void>(client);
     static_cast<void>(cmd);
 }
+
+CommandHandler::~CommandHandler() {}

@@ -70,16 +70,5 @@ Command parseCommand(const std::string& str) {
         cmd.params.push_back(str.substr(i, space - i));
         i = space;
     }
-
-    // std::cout << std::endl;
-    // std::cout << cmd.prefix << " " << cmd.command << " " << cmd.params.size() << std::endl;
-    // size_t x = 0;
-    // while (x < cmd.params.size())
-    // {
-    //     std::cout << cmd.params[x] << " ";
-    //     x++;
-    // }
-    // std::cout << std::endl;
-    // std::cout << std::endl;
     return cmd;
 }

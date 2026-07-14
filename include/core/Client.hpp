@@ -21,15 +21,17 @@ class Client {
         
         Client(int fd);
 
+        std::string extractCommand();
+
         const std::string& getNick() const;
         void setNick(std::string newNick);
 
         const std::string& getUser() const;
         void setUser(std::string newUser);
 
-        void        fillBuffer(const char* buff, bool io);
+        void        fillInBuffer(const char* buff);
+        void        fillOutBuffer(const char* buff);
         bool        hasCompleteCommand() const;
-        std::string extractCommand();
         
         ~Client();
 };

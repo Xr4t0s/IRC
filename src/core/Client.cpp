@@ -2,28 +2,13 @@
 
 Client::Client(int fd) : _fd(fd), _hasPassword(false), _hasUsername(false), _hasNick(false), registered(false) {}
 
-void    Client::fillBuffer(const char* buff, bool io) {
-    if (io == false)// Output
-    {
-        bool wasEmpty = _outBuff.empty();
-        _outBuff.append(buff);
-
-        if (wasEmpty)
-        {
-            //enable client write
-        }
-    }
-    else
-        _inBuff.append(buff);
-}
-
-bool    Client::hasCompleteCommand() const {
+std::string Client::extractCommand() {
     size_t index = _inBuff.find("\r\n");
 
-    if (index != std::string::npos)
-        return true;
+    std::string cmd = _inBuff.substr(0, index);
+    _inBuff.erase(0, index + 2);
 
-    return false;
+    return cmd;
 }
 
 const std::string& Client::getNick() const
@@ -46,13 +31,27 @@ void Client::setUser(std::string newUser)
     _user = newUser;
 }
 
-std::string Client::extractCommand() {
+void    Client::fillInBuffer(const char* buff) {
+        _inBuff.append(buff);
+}
+
+void    Client::fillOutBuffer(const char* buff) {
+    bool wasEmpty = _outBuff.empty();
+    _outBuff.append(buff);
+
+    if (wasEmpty)
+    {
+        //enable client write
+    }
+}
+
+bool    Client::hasCompleteCommand() const {
     size_t index = _inBuff.find("\r\n");
 
-    std::string cmd = _inBuff.substr(0, index);
-    _inBuff.erase(0, index + 2);
+    if (index != std::string::npos)
+        return true;
 
-    return cmd;
+    return false;
 }
 
 Client::~Client() {}
