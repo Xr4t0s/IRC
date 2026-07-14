@@ -26,16 +26,19 @@ class Server {
         bool        init(char **args);
         void        run();
 
-        Channel*    getChannelByName(const std::string& name);
+        const       std::string& getPassword() const;
+
         Client*     getClientByFd(int fd);
+        Client*     getClientByNick(std::string nick);
+        Channel*    getChannelByName(const std::string& name);
 
         ~Server();
 
     private:
         int                             _fd;
-        std::string                     _pass;
         int                             _port;
         int                             _efd;
+        std::string                     _pass;
 
         std::map<int, Client>           _clients;
         std::map<std::string, Channel>  _channels;

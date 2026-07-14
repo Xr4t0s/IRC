@@ -1,27 +1,57 @@
 #include <core/Client.hpp>
 
-Client::Client(int fd) : _fd(fd), _hasPassword(false), _hasUsername(false), registered(false) {}
+Client::Client(int fd) : _fd(fd), _hasPassword(false), _hasUsername(false), _hasNick(false), registered(false) {}
 
-void    Client::fillBuffer(char* buff) {
-    _buff.append(buff);
+std::string Client::extractCommand() {
+    size_t index = _inBuff.find("\r\n");
+
+    std::string cmd = _inBuff.substr(0, index);
+    _inBuff.erase(0, index + 2);
+
+    return cmd;
+}
+
+const std::string& Client::getNick() const
+{
+    return _nick;
+}
+
+void Client::setNick(std::string newNick)
+{
+    _nick = newNick;
+}
+
+const std::string& Client::getUser() const
+{
+    return _user;
+}
+
+void Client::setUser(std::string newUser)
+{
+    _user = newUser;
+}
+
+void    Client::fillInBuffer(const char* buff) {
+        _inBuff.append(buff);
+}
+
+void    Client::fillOutBuffer(const char* buff) {
+    bool wasEmpty = _outBuff.empty();
+    _outBuff.append(buff);
+
+    if (wasEmpty)
+    {
+        //enable client write
+    }
 }
 
 bool    Client::hasCompleteCommand() const {
-    size_t index = _buff.find("\r\n");
+    size_t index = _inBuff.find("\r\n");
 
     if (index != std::string::npos)
         return true;
 
     return false;
-}
-
-std::string Client::extractCommand() {
-    size_t index = _buff.find("\r\n");
-
-    std::string cmd = _buff.substr(0, index);
-    _buff.erase(0, index + 2);
-
-    return cmd;
 }
 
 Client::~Client() {}

@@ -70,6 +70,5 @@ Command parseCommand(const std::string& str) {
         cmd.params.push_back(str.substr(i, space - i));
         i = space;
     }
-
     return cmd;
 }
