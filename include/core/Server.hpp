@@ -9,6 +9,7 @@
 #include <netinet/in.h>
 #include <sys/epoll.h>
 #include <signal.h>
+#include <cerrno>
 
 #ifndef MAX_EVENTS
     # define MAX_EVENTS 64
@@ -27,6 +28,8 @@ class Server {
         void        run();
 
         const       std::string& getPassword() const;
+        int getEfd() const;
+
 
         Client*     getClientByFd(int fd);
         Client*     getClientByNick(std::string nick);

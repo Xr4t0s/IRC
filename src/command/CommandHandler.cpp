@@ -1,9 +1,10 @@
 #include "command/CommandHandler.hpp"
 #include "core/Server.hpp"
+#include "command/Reply.hpp"
 
 //PASS/USER ERR
 static const char *ERR_NEEDMOREPARAMS = "461 ERR_NEEDMOREPARAMS";
-static const char *ERR_PASSWDMISMATCH = "464 ERR_PASSWDMISMATCH";
+// static const char *ERR_PASSWDMISMATCH = "464 ERR_PASSWDMISMATCH";
 static const char *ERR_ALREADYREGISTRED = "462 ERR_ALREADYREGISTRED";
 
 //NICK ERR
@@ -32,20 +33,20 @@ void CommandHandler::execute(Client& client, const Command& cmd) {
 void CommandHandler::_pass(Client& client, const Command& cmd) {
     if (client.registered == true)
     {
-        client.fillOutBuffer(ERR_ALREADYREGISTRED);
+        client.fillOutBuffer(Reply::sendReply(462, client.getNick(), "ERR_ALREADYREGISTRED").c_str(), _server.getEfd());
         return;
     }
 
     if (cmd.params.size() < 1)
     {
-        client.fillOutBuffer(ERR_NEEDMOREPARAMS);
+        client.fillOutBuffer(ERR_NEEDMOREPARAMS, _server.getEfd());
         return;
     }
 
     if (!cmd.params[0].compare(_server.getPassword()))
         client._hasPassword = true;
     else
-        client.fillOutBuffer(ERR_PASSWDMISMATCH);
+        client.fillOutBuffer(Reply::sendReply(464, client.getNick(), "ERR_PASSWDMISMATCH").c_str(), _server.getEfd());
     
     if (client._hasNick && client._hasUsername && client._hasPassword)
         client.registered = true;
@@ -54,12 +55,12 @@ void CommandHandler::_nick(Client& client, const Command& cmd) {
 
     if (cmd.params.size() < 1 || cmd.params[0].empty() == true)
     {
-        client.fillOutBuffer(ERR_NONICKNAMEGIVEN);
+        client.fillOutBuffer(ERR_NONICKNAMEGIVEN, _server.getEfd());
         return;
     }
     if (_server.getClientByNick(cmd.params[0]) != NULL)
     {
-        client.fillOutBuffer(ERR_NICKNAMEINUSE); // Or ERR_NICKCOLLISION don't know which one to use.
+        client.fillOutBuffer(ERR_NICKNAMEINUSE, _server.getEfd()); // Or ERR_NICKCOLLISION don't know which one to use.
         return;
     }
 
@@ -75,12 +76,12 @@ void CommandHandler::_nick(Client& client, const Command& cmd) {
 void CommandHandler::_user(Client& client, const Command& cmd) {
     if (client.registered == true)
     {
-        client.fillOutBuffer(ERR_ALREADYREGISTRED);
+        client.fillOutBuffer(ERR_ALREADYREGISTRED, _server.getEfd());
         return;
     }
     if (cmd.params.size() < 1)
     {
-        client.fillOutBuffer(ERR_NEEDMOREPARAMS);
+        client.fillOutBuffer(ERR_NEEDMOREPARAMS, _server.getEfd());
         return;
     }
 

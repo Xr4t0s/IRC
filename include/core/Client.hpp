@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <unistd.h>
+#include <sys/epoll.h>
 
 class Client {
     private:
@@ -23,6 +24,9 @@ class Client {
 
         std::string extractCommand();
 
+        std::string& getOutBuff();
+        std::string& getInBuff();
+
         const std::string& getNick() const;
         void setNick(std::string newNick);
 
@@ -30,7 +34,7 @@ class Client {
         void setUser(std::string newUser);
 
         void        fillInBuffer(const char* buff);
-        void        fillOutBuffer(const char* buff);
+        void        fillOutBuffer(const char* buff, int efd);
         bool        hasCompleteCommand() const;
         
         ~Client();
