@@ -40,7 +40,7 @@ Regroupé par phase, dans l'ordre logique d'implémentation.
 - [x] `CommandHandler` : table de dispatch (`map<string, méthode>`)
 - [x] `execute()` avec `find()` (pas d'insertion parasite)
 - [x] Forward declaration `Server`/`Client` (casser le cycle d'include)
-- [~] `parseCommand()` : ligne IRC → `Command` (voir `docs/PARSING.md`)
+- [x] `parseCommand()` : ligne IRC → `Command` (voir `docs/PARSING.md`)
   - [x] Extraction préfixe optionnel (`:` en début de ligne)
   - [x] Extraction commande
   - [x] Middle params
@@ -49,19 +49,19 @@ Regroupé par phase, dans l'ordre logique d'implémentation.
 
 ## Phase 4 — Chemin d'envoi (réponses)
 
-- [ ] Buffer de sortie par client (`_outBuf`) + `enqueue(reply)`
-- [ ] `send` non-bloquant, gestion envoi partiel (compte d'octets, sans `errno`)
-- [ ] Activer `EPOLLOUT` seulement quand `_outBuf` non vide (`EPOLL_CTL_MOD`)
-- [ ] Repasser en `EPOLLIN` seul quand `_outBuf` vidé (éviter 100% CPU)
-- [ ] Inspecter `events[i].events` dans la boucle (IN / OUT / ERR / HUP)
-- [ ] Fichier `Replies.hpp` : réponses numériques (format `:serveur CODE ...`)
+- [x] Buffer de sortie par client (`_outBuf`) + `enqueue(reply)`
+- [x] `send` non-bloquant, gestion envoi partiel (compte d'octets, sans `errno`)
+- [x] Activer `EPOLLOUT` seulement quand `_outBuf` non vide (`EPOLL_CTL_MOD`)
+- [x] Repasser en `EPOLLIN` seul quand `_outBuf` vidé (éviter 100% CPU)
+- [~] Inspecter `events[i].events` dans la boucle (IN / OUT / ERR / HUP)
+- [x] Fichier `Reply.hpp` : réponses numériques (format `:serveur CODE ...`)
 
 ## Phase 5 — Enregistrement (registration)
 
-- [ ] `PASS` (vérifier mot de passe, `ERR_PASSWDMISMATCH` 464)
-- [ ] `NICK` (unicité, format, `ERR_NICKNAMEINUSE` 433, `ERR_ERRONEUSNICKNAME` 432)
-- [ ] `USER` (username + realname via trailing)
-- [ ] Passage `registered` quand PASS+NICK+USER OK → `RPL_WELCOME` 001
+- [x] `PASS` (vérifier mot de passe, `ERR_PASSWDMISMATCH` 464)
+- [x] `NICK` (unicité, format, `ERR_NICKNAMEINUSE` 433, `ERR_ERRONEUSNICKNAME` 432)
+- [~] `USER` (username + realname via trailing)
+- [~] Passage `registered` quand PASS+NICK+USER OK → `RPL_WELCOME` 001
 - [ ] Rejet des commandes avant registration (`ERR_NOTREGISTERED` 451)
 - [ ] `PING` / `PONG` (garder la connexion vivante)
 - [ ] `QUIT` (déconnexion propre, notifier les channels)
