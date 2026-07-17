@@ -200,36 +200,59 @@ void Server::run() {
                 c'est ici qu'on traite msg et commande comme KICK etc on doit parse plus bas
             */
             else {
-                // on crée un buffer pour recv
-                // todo! mettre un #define CLIENT_BUFFER <uint>
-                char buff[512 + 1];
+                epoll_event ev = events[i];
+                if (ev.events & EPOLLIN) {
+                    // on crée un buffer pour recv
+                    // todo! mettre un #define CLIENT_BUFFER <uint>
+                    char buff[512 + 1];
 
-                // On lit depuis le fd
-                int nread = recv(fd, buff, 512, 0);
-                if (nread == 0) {
-                    // Si aucun bytes lu mais message correct -> fin de connexion
-                    std::cout << "Removed client" << std::endl;
-                    _remove_client(fd);
-                    continue;
-                } else if (nread > 0) {
-                    // Ici on imprime juste mais on doit gérer buffer + command ici
-                    // todo! implémenter le parsing
-                    buff[nread] = '\0';
-
+                    // On lit depuis le fd
+                    int nread = recv(fd, buff, 512, 0);
+                    if (nread == 0) {
+                        // Si aucun bytes lu mais message correct -> fin de connexion
+                        std::cout << "Removed client" << std::endl;
+                        _remove_client(fd);
+                        continue;
+                    } else if (nread > 0) {
+                        // Ici on imprime juste mais on doit gérer buffer + command ici
+                        // todo! implémenter le parsing
+                        buff[nread] = '\0';
+    
+                        Client* client = this->getClientByFd(fd);
+                        if (!client)
+                            throw Error("Server Misunderstood client");
+                            
+                        client->fillInBuffer(buff);
+                        while (client->hasCompleteCommand())
+                            _cmdHandler.execute(*client, parseCommand(client->extractCommand()));
+                        
+                        std::cout << buff << std::endl;
+                        
+                        continue;
+                    } else if (nread < 0) {
+                        _remove_client(fd);
+                        continue;
+                    }
+                } else if (ev.events & EPOLLOUT) {
+                    std::cout << "EPOLLOUT" << std::endl;
                     Client* client = this->getClientByFd(fd);
                     if (!client)
                         throw Error("Server Misunderstood client");
-                        
-                    client->fillInBuffer(buff);
-                    while (client->hasCompleteCommand())
-                        _cmdHandler.execute(*client, parseCommand(client->extractCommand()));
+
+                    std::string& clientBuff = client->getOutBuff();
+
+                    ssize_t tmp = send(fd, clientBuff.c_str(), clientBuff.size(), 0);
+                    if (tmp == -1)
+                        throw Error("Send Unexpected Error");
+                    clientBuff.erase(0, tmp);
                     
-                    std::cout << buff << std::endl;
-                    
-                    continue;
-                } else if (nread < 0) {
-                    _remove_client(fd);
-                    continue;
+                    if (clientBuff.empty()) {
+                        epoll_event event;
+                        event.events = EPOLLIN;
+                        event.data.fd = fd;
+
+                        epoll_ctl(_efd, EPOLL_CTL_MOD, fd, &event);
+                    }
                 }
             }
         }
@@ -239,6 +262,10 @@ void Server::run() {
 const std::string& Server::getPassword() const
 {
     return _pass;
+}
+
+int Server::getEfd() const {
+    return _efd;
 }
 
 Client* Server::getClientByFd(int fd) {
