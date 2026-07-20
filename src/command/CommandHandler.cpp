@@ -95,6 +95,16 @@ void CommandHandler::_user(Client& client, const Command& cmd) {
 }
 void CommandHandler::_join(Client& client, const Command& cmd) {
     static_cast<void>(client);
+    // Create channel if does not already exist.
+    // Then add this client to the client* list of this channel
+    // and add in client classe the name or anything that can relate to the channel
+    // to be able to know in which one he's in.
+    if (cmd.params.size() < 1)
+    {
+        client.fillOutBuffer(ERR_NEEDMOREPARAMS, _server.getEfd());
+        return;
+    }
+	
     static_cast<void>(cmd);
 }
 void CommandHandler::_quit(Client& client, const Command& cmd) {
