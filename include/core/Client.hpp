@@ -22,6 +22,8 @@ class Client {
         
         Client(int fd);
 
+		std::vector<Channel*> channels;
+
         std::string extractCommand();
 
         std::string& getOutBuff();
