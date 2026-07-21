@@ -24,6 +24,8 @@ class CommandHandler {
         void    _user(Client& client, const Command& cmd);
         void    _join(Client& client, const Command& cmd);
         void    _quit(Client& client, const Command& cmd);
+        void    _msg(Client& client, const Command& cmd);
+
 
     public:
         CommandHandler(Server& server);

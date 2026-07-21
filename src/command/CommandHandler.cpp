@@ -13,12 +13,17 @@ static const char *ERR_NONICKNAMEGIVEN  = "431 ERR_NONICKNAMEGIVEN";
 static const char *ERR_NICKNAMEINUSE    = "433 ERR_NICKNAMEINUSE";
 // static const char *ERR_NICKCOLLISION    = "436 ERR_NICKCOLLISION";// not use for now
 
+//JOIN ERR
+static const char *ERR_NOSUCHCHANNEL  = "403 ERR_NOSUCHCHANNEL";
+
 CommandHandler::CommandHandler(Server& server) : _server(server) {
     _cmds["PASS"] = &CommandHandler::_pass;
     _cmds["NICK"] = &CommandHandler::_nick;
     _cmds["USER"] = &CommandHandler::_user;
     _cmds["JOIN"] = &CommandHandler::_join;
     _cmds["QUIT"] = &CommandHandler::_quit;
+    _cmds["MSG"] = &CommandHandler::_msg;
+
 }
 
 void CommandHandler::execute(Client& client, const Command& cmd) {
@@ -94,22 +99,67 @@ void CommandHandler::_user(Client& client, const Command& cmd) {
         client.registered = true;
 }
 void CommandHandler::_join(Client& client, const Command& cmd) {
-    static_cast<void>(client);
     // Create channel if does not already exist.
     // Then add this client to the client* list of this channel
     // and add in client classe the name or anything that can relate to the channel
     // to be able to know in which one he's in.
+    
+    std::string name;
+
     if (cmd.params.size() < 1)
     {
         client.fillOutBuffer(ERR_NEEDMOREPARAMS, _server.getEfd());
         return;
     }
-	
-    static_cast<void>(cmd);
+    if (cmd.params[0][0] != '#' && cmd.params[0][0] != '&')
+    {
+        client.fillOutBuffer(ERR_NOSUCHCHANNEL, _server.getEfd());
+        return;
+    }
+    else
+    {
+        name = cmd.params[0].substr(1, cmd.params[0].size());
+    }
+    std::map<std::string, Channel *>::iterator it = _server._channels.find(name);
+    if (it == _server._channels.end())
+    {
+        Channel * channel = new Channel(&client, name);
+        _server._channels.insert(std::make_pair(name, channel));
+        client.channels.push_back(channel);
+        std::cout << client.getNick() << "Create and join: " << name << std::endl;
+        // TODO: envoyer JOIN + réponse serveur
+    }
+    else
+    {
+        it->second->_clients.push_back(&client);
+        client.channels.push_back(it->second);
+        std::cout << client.getNick() << "Join: " << name << std::endl;
+        // TODO: envoyer JOIN + réponse serveur
+    }
 }
 void CommandHandler::_quit(Client& client, const Command& cmd) {
     static_cast<void>(client);
     static_cast<void>(cmd);
+}
+void CommandHandler::_msg(Client& client, const Command& cmd) {
+    if (client.channels.empty())
+        return;
+    else
+    {
+        std::string tmp = client.getNick() + ": ";
+        tmp.append(cmd.params[0]);
+        tmp.append("\r\n");
+        const char * buff = tmp.c_str();
+
+        size_t i = 0;
+        while (i < client.channels[0]->_clients.size())
+        {
+            client.channels[0]->_clients[i]->fillOutBuffer(buff, _server.getEfd());
+            i++;
+        }
+    }
+    static_cast<void>(cmd);
+
 }
 
 CommandHandler::~CommandHandler() {}
