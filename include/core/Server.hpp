@@ -26,7 +26,7 @@ class Server {
         
         bool        init(char **args);
         void        run();
-        std::map<std::string, Channel *>  _channels;
+        std::map<std::string, Channel>  _channels;
 
         const       std::string& getPassword() const;
         int getEfd() const;

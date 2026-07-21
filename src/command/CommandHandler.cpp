@@ -120,19 +120,20 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
     {
         name = cmd.params[0].substr(1, cmd.params[0].size());
     }
-    std::map<std::string, Channel *>::iterator it = _server._channels.find(name);
+    std::map<std::string, Channel>::iterator it = _server._channels.find(name);
     if (it == _server._channels.end())
     {
-        Channel * channel = new Channel(&client, name);
-        _server._channels.insert(std::make_pair(name, channel));
-        client.channels.push_back(channel);
+        Channel channel(&client, name);
+        std::pair<std::map<std::string, Channel>::iterator, bool> res =
+            _server._channels.insert(std::make_pair(name, channel));
+        client.channels.push_back(&(res.first->second));
         std::cout << client.getNick() << "Create and join: " << name << std::endl;
         // TODO: envoyer JOIN + réponse serveur
     }
     else
     {
-        it->second->_clients.push_back(&client);
-        client.channels.push_back(it->second);
+        it->second._clients.push_back(&client);
+        client.channels.push_back(&(*it).second);
         std::cout << client.getNick() << "Join: " << name << std::endl;
         // TODO: envoyer JOIN + réponse serveur
     }
