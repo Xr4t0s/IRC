@@ -1,15 +1,19 @@
 #pragma once
 
 #include <iostream>
-#include "Client.hpp"
+#include <vector>
+
+class Client;
 
 class Channel {
     private:
 
         std::string             _name;
-        std::vector<Client*>    _clients;
-    
+        
     public:
+
+        std::vector<Client*>    _clients;
+        
         Channel();
         Channel(Client * client, std::string name);
         ~Channel();
