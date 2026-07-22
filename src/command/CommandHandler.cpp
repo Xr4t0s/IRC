@@ -104,38 +104,23 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
     // and add in client classe the name or anything that can relate to the channel
     // to be able to know in which one he's in.
     
-    std::string name;
-
     if (cmd.params.size() < 1)
-    {
-        client.fillOutBuffer(ERR_NEEDMOREPARAMS, _server.getEfd());
-        return;
-    }
+        return client.fillOutBuffer(ERR_NEEDMOREPARAMS, _server.getEfd());
     if (cmd.params[0][0] != '#' && cmd.params[0][0] != '&')
-    {
-        client.fillOutBuffer(ERR_NOSUCHCHANNEL, _server.getEfd());
-        return;
-    }
-    else
-    {
-        name = cmd.params[0].substr(1, cmd.params[0].size());
-    }
-    std::map<std::string, Channel>::iterator it = _server._channels.find(name);
-    if (it == _server._channels.end())
-    {
-        Channel channel(&client, name);
-        std::pair<std::map<std::string, Channel>::iterator, bool> res =
-            _server._channels.insert(std::make_pair(name, channel));
-        client.channels.push_back(&(res.first->second));
+        return client.fillOutBuffer(ERR_NOSUCHCHANNEL, _server.getEfd());
+
+    std::string name = cmd.params[0].substr(1, cmd.params[0].size());
+
+    Channel* channel = _server.getChannelByName(name);
+    if (!channel) {
+        Channel newChannel(&client, name);
+        _server.createNewChannel(&client, name, newChannel);
         std::cout << client.getNick() << "Create and join: " << name << std::endl;
         // TODO: envoyer JOIN + réponse serveur
-    }
-    else
-    {
-        it->second._clients.push_back(&client);
-        client.channels.push_back(&(*it).second);
-        std::cout << client.getNick() << "Join: " << name << std::endl;
-        // TODO: envoyer JOIN + réponse serveur
+    } else {
+        channel->_clients.push_back(&client);
+        client.channels.push_back(channel);
+        std::cout << client.getNick() << " joined " << name << std::endl;
     }
 }
 void CommandHandler::_quit(Client& client, const Command& cmd) {

@@ -304,6 +304,14 @@ Channel* Server::getChannelByName(const std::string& name) {
     return NULL;
 }
 
+bool    Server::createNewChannel(Client* client, std::string name, Channel newChannel) {
+    std::pair<std::map<std::string, Channel>::iterator, bool> res =
+        this->_channels.insert(std::make_pair(name, newChannel));
+    client->channels.push_back(&(res.first->second));
+
+    return true;
+}
+
 void    Server::_accept_client() {
     // On crée laddress du client comme pour notre serveur
     sockaddr_in addr;
