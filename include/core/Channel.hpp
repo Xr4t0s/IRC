@@ -16,5 +16,9 @@ class Channel {
         
         Channel();
         Channel(Client * client, std::string name);
+
+        void    addClient(Client* newClient);
+        bool    removeClient(Client* oldClient);
+
         ~Channel();
 };

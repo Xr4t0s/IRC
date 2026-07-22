@@ -118,14 +118,26 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
         std::cout << client.getNick() << "Create and join: " << name << std::endl;
         // TODO: envoyer JOIN + réponse serveur
     } else {
-        channel->_clients.push_back(&client);
+        channel->addClient(&client);
         client.channels.push_back(channel);
         std::cout << client.getNick() << " joined " << name << std::endl;
     }
 }
 void CommandHandler::_quit(Client& client, const Command& cmd) {
-    static_cast<void>(client);
-    static_cast<void>(cmd);
+    if (cmd.params.size() < 1)
+        return client.fillOutBuffer(ERR_NEEDMOREPARAMS, _server.getEfd());
+    
+    Channel* channelToQuit = _server.getChannelByName(cmd.params[0]);
+    if (!channelToQuit)
+        // TODO
+        return client.fillOutBuffer("ERR_NOCHANNEL", _server.getEfd());
+
+    if (channelToQuit->removeClient(&client)) {
+        // TODO
+        return client.fillOutBuffer("SUCCESS", _server.getEfd());
+    }
+
+    return client.fillOutBuffer("FAILURE", _server.getEfd());
 }
 void CommandHandler::_msg(Client& client, const Command& cmd) {
     if (client.channels.empty())
