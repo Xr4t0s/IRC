@@ -53,7 +53,7 @@ Regroupé par phase, dans l'ordre logique d'implémentation.
 - [x] `send` non-bloquant, gestion envoi partiel (compte d'octets, sans `errno`)
 - [x] Activer `EPOLLOUT` seulement quand `_outBuf` non vide (`EPOLL_CTL_MOD`)
 - [x] Repasser en `EPOLLIN` seul quand `_outBuf` vidé (éviter 100% CPU)
-- [~] Inspecter `events[i].events` dans la boucle (IN / OUT / ERR / HUP)
+- [x] Inspecter `events[i].events` dans la boucle (IN / OUT / ERR / HUP)
 - [x] Fichier `Reply.hpp` : réponses numériques (format `:serveur CODE ...`)
 
 ## Phase 5 — Enregistrement (registration)
@@ -64,14 +64,14 @@ Regroupé par phase, dans l'ordre logique d'implémentation.
 - [~] Passage `registered` quand PASS+NICK+USER OK → `RPL_WELCOME` 001
 - [ ] Rejet des commandes avant registration (`ERR_NOTREGISTERED` 451)
 - [ ] `PING` / `PONG` (garder la connexion vivante)
-- [ ] `QUIT` (déconnexion propre, notifier les channels)
+- [~] `QUIT` (déconnexion propre, notifier les channels)
 
 ## Phase 6 — Channels
 
 - [ ] Classe `Channel` : membres, opérateurs, topic, clé, limite, modes
-- [ ] `JOIN` (créer/rejoindre, `RPL_NAMREPLY` 353, `RPL_ENDOFNAMES` 366)
+- [~] `JOIN` (créer/rejoindre, `RPL_NAMREPLY` 353, `RPL_ENDOFNAMES` 366)
 - [ ] `PART` (quitter un channel)
-- [ ] `PRIVMSG` vers un channel (broadcast aux membres) et vers un nick
+- [~] `PRIVMSG` vers un channel (broadcast aux membres) et vers un nick
 - [ ] `NOTICE`
 - [ ] `TOPIC` (voir / définir, `RPL_TOPIC` 332 / `RPL_NOTOPIC` 331)
 - [ ] Broadcast propre (exclure l'émetteur quand il faut)
