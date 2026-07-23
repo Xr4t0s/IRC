@@ -139,23 +139,29 @@ void CommandHandler::_part(Client& client, const Command& cmd) {
     }
 }
 void CommandHandler::_prvmsg(Client& client, const Command& cmd) {
-    if (client.channels.empty())
-        return;
-    else
+    if (cmd.params.size() < 1)
+        client.fillOutBuffer(Reply::noRecipient(client, cmd.command).c_str(), _server.getEfd());
+    if (cmd.params.size() < 2 || cmd.params[1].empty())
+        client.fillOutBuffer(Reply::noTextToSend(client).c_str(), _server.getEfd());
+    std::string params = cmd.params[1];
+    while (params.empty() == false)
     {
-        std::string tmp = client.getNick() + ": ";
-        tmp.append(cmd.params[0]);
-        tmp.append("\r\n");
-        const char * buff = tmp.c_str();
+        // if (params[0] == '&' || params[0] == '#')
+        // {
+        //     std::string tmp = params.substr(0, params.find(','));
+        //     params.erase(0, tmp.size() + 1);
 
-        size_t i = 0;
-        while (i < client.channels[0]->_clients.size())
-        {
-            client.channels[0]->_clients[i]->fillOutBuffer(buff, _server.getEfd());
-            i++;
-        }
+        //     Channel * channel = _server.getChannelByName(tmp);
+        //     if (channel == NULL)
+        //         return;
+
+        // }
+        // else
+        // {
+        //     //nick
+        // }
     }
-    static_cast<void>(cmd);
+        
 
 }
 
