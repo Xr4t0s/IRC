@@ -29,6 +29,7 @@ class CommandHandler {
         CommandHandler(Server& server);
 
         void execute(Client& client, const Command& cmd);
+        void completeRegistration(Client& client);
 
         ~CommandHandler();
 };
