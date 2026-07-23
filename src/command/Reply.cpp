@@ -130,4 +130,20 @@ std::string Reply::relayPart(Client& src, const std::string& channel, const std:
     return ret;
 }
 
+std::string Reply::noRecipient(Client& client, const std::string& command) {
+    return _serializeNumeric(
+        411,
+        (client.getNick().empty() ? "*" : client.getNick()),
+        ":No recipient given (" + command + ")"
+    );
+}
+
+std::string Reply::noTextToSend(Client& client) {
+    return _serializeNumeric(
+        412,
+        (client.getNick().empty() ? "*" : client.getNick()),
+        "No text to send"
+    );
+}
+
 Reply::~Reply() {}
