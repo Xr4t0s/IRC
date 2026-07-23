@@ -36,21 +36,15 @@ void CommandHandler::execute(Client& client, const Command& cmd) {
 
 void CommandHandler::_pass(Client& client, const Command& cmd) {
     if (client.registered == true)
-    {
-        client.fillOutBuffer(Reply::sendReply(462, client.getNick(), "ERR_ALREADYREGISTRED").c_str(), _server.getEfd());
-        return;
-    }
+        return client.fillOutBuffer(Reply::alreadyRegistered(client).c_str(), _server.getEfd());
 
     if (cmd.params.size() < 1)
-    {
-        client.fillOutBuffer(Reply::sendReply(461, client.getNick(), "ERR_NEEDMOREPARAMS").c_str(), _server.getEfd());
-        return;
-    }
+        return client.fillOutBuffer(Reply::needMoreParams(client, cmd.command).c_str(), _server.getEfd());
 
     if (!cmd.params[0].compare(_server.getPassword()))
         client._hasPassword = true;
     else
-        client.fillOutBuffer(Reply::sendReply(464, client.getNick(), "ERR_PASSWDMISMATCH").c_str(), _server.getEfd());
+        client.fillOutBuffer(Reply::passwdMismatch(client).c_str(), _server.getEfd());
     
     if (client._hasNick && client._hasUsername && client._hasPassword)
         client.registered = true;
@@ -58,15 +52,11 @@ void CommandHandler::_pass(Client& client, const Command& cmd) {
 void CommandHandler::_nick(Client& client, const Command& cmd) {
 
     if (cmd.params.size() < 1 || cmd.params[0].empty() == true)
-    {
-        client.fillOutBuffer(ERR_NONICKNAMEGIVEN, _server.getEfd());
-        return;
-    }
+        // todo: replace ERR_NONICKNAMEGIVEN with Reply::<good_function>
+        return client.fillOutBuffer(ERR_NONICKNAMEGIVEN, _server.getEfd());
+
     if (_server.getClientByNick(cmd.params[0]) != NULL) 
-    {
-        client.fillOutBuffer(Reply::sendReply(433, client.getNick(), "ERR_NICKNAMEINUSE").c_str(), _server.getEfd());
-        return;
-    }
+        return client.fillOutBuffer(Reply::nicknameInUse(client, cmd.params[0]).c_str(), _server.getEfd());
 
     // TODO: if ( nick has invalid/not compatible characters)
     // fillOutBuffer( ERR_ERRONEUSNICKNAME )
@@ -79,18 +69,12 @@ void CommandHandler::_nick(Client& client, const Command& cmd) {
 }
 void CommandHandler::_user(Client& client, const Command& cmd) {
     if (client.registered == true)
-    {
-        client.fillOutBuffer(Reply::sendReply(462, client.getNick(), "ERR_ALREADYREGISTRED").c_str(), _server.getEfd());
-        return;
-    }
+        return client.fillOutBuffer(Reply::alreadyRegistered(client).c_str(), _server.getEfd());
+
     if (cmd.params.size() < 1)
-    {
-        client.fillOutBuffer(Reply::sendReply(461, client.getNick(), "ERR_NEEDMOREPARAMS").c_str(), _server.getEfd());
-        return;
-    }
+        return client.fillOutBuffer(Reply::needMoreParams(client, cmd.command).c_str(), _server.getEfd());
 
     client.setUser(cmd.params[0]);
-    std::cout << client.getUser() << std::endl;// console log
 
     //TODO: handle realName [USER < username > '' '' < :realName > ]
 
@@ -104,9 +88,9 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
     // to be able to know in which one he's in.
     
     if (cmd.params.size() < 1)
-        return client.fillOutBuffer(Reply::sendReply(461, client.getNick(), "ERR_NEEDMOREPARAMS").c_str(), _server.getEfd());
+        return client.fillOutBuffer(Reply::needMoreParams(client, cmd.command).c_str(), _server.getEfd());
     if (cmd.params[0][0] != '#' && cmd.params[0][0] != '&')
-        return client.fillOutBuffer(Reply::sendReply(403, client.getNick(), "ERR_NOSUCHCHANNEL").c_str(), _server.getEfd());
+        return client.fillOutBuffer(Reply::noSuchChannel(client, cmd.params[0]).c_str(), _server.getEfd());
 
     std::string name = cmd.params[0];
 
@@ -124,7 +108,7 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
 }
 void CommandHandler::_part(Client& client, const Command& cmd) {
     if (cmd.params.size() < 1)
-        return client.fillOutBuffer(Reply::sendReply(461, client.getNick(), "ERR_NEEDMOREPARAMS").c_str(), _server.getEfd());
+        return client.fillOutBuffer(Reply::needMoreParams(client, cmd.command).c_str(), _server.getEfd());
     
     Channel* channelToQuit = _server.getChannelByName(cmd.params[0]);
     if (!channelToQuit)
