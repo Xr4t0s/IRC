@@ -3,27 +3,26 @@
 #include "command/Reply.hpp"
 
 //PASS/USER ERR
-static const char *ERR_NEEDMOREPARAMS = "461 ERR_NEEDMOREPARAMS";
+// static const char *ERR_NEEDMOREPARAMS = "461 ERR_NEEDMOREPARAMS";
 // static const char *ERR_PASSWDMISMATCH = "464 ERR_PASSWDMISMATCH";
-static const char *ERR_ALREADYREGISTRED = "462 ERR_ALREADYREGISTRED";
+// static const char *ERR_ALREADYREGISTRED = "462 ERR_ALREADYREGISTRED";
 
 //NICK ERR
 static const char *ERR_NONICKNAMEGIVEN  = "431 ERR_NONICKNAMEGIVEN";
 // static const char *ERR_ERRONEUSNICKNAME = "432 ERR_ERRONEUSNICKNAME";// not use for now
-static const char *ERR_NICKNAMEINUSE    = "433 ERR_NICKNAMEINUSE";
+// static const char *ERR_NICKNAMEINUSE    = "433 ERR_NICKNAMEINUSE";
 // static const char *ERR_NICKCOLLISION    = "436 ERR_NICKCOLLISION";// not use for now
 
 //JOIN ERR
-static const char *ERR_NOSUCHCHANNEL  = "403 ERR_NOSUCHCHANNEL";
+// static const char *ERR_NOSUCHCHANNEL  = "403 ERR_NOSUCHCHANNEL";
 
 CommandHandler::CommandHandler(Server& server) : _server(server) {
     _cmds["PASS"] = &CommandHandler::_pass;
     _cmds["NICK"] = &CommandHandler::_nick;
     _cmds["USER"] = &CommandHandler::_user;
     _cmds["JOIN"] = &CommandHandler::_join;
-    _cmds["QUIT"] = &CommandHandler::_quit;
-    _cmds["MSG"] = &CommandHandler::_msg;
-
+    _cmds["PART"] = &CommandHandler::_part;
+    _cmds["PRVMSG"] = &CommandHandler::_prvmsg;
 }
 
 void CommandHandler::execute(Client& client, const Command& cmd) {
@@ -44,7 +43,7 @@ void CommandHandler::_pass(Client& client, const Command& cmd) {
 
     if (cmd.params.size() < 1)
     {
-        client.fillOutBuffer(ERR_NEEDMOREPARAMS, _server.getEfd());
+        client.fillOutBuffer(Reply::sendReply(461, client.getNick(), "ERR_NEEDMOREPARAMS").c_str(), _server.getEfd());
         return;
     }
 
@@ -63,9 +62,9 @@ void CommandHandler::_nick(Client& client, const Command& cmd) {
         client.fillOutBuffer(ERR_NONICKNAMEGIVEN, _server.getEfd());
         return;
     }
-    if (_server.getClientByNick(cmd.params[0]) != NULL)
+    if (_server.getClientByNick(cmd.params[0]) != NULL) 
     {
-        client.fillOutBuffer(ERR_NICKNAMEINUSE, _server.getEfd()); // Or ERR_NICKCOLLISION don't know which one to use.
+        client.fillOutBuffer(Reply::sendReply(433, client.getNick(), "ERR_NICKNAMEINUSE").c_str(), _server.getEfd());
         return;
     }
 
@@ -81,12 +80,12 @@ void CommandHandler::_nick(Client& client, const Command& cmd) {
 void CommandHandler::_user(Client& client, const Command& cmd) {
     if (client.registered == true)
     {
-        client.fillOutBuffer(ERR_ALREADYREGISTRED, _server.getEfd());
+        client.fillOutBuffer(Reply::sendReply(462, client.getNick(), "ERR_ALREADYREGISTRED").c_str(), _server.getEfd());
         return;
     }
     if (cmd.params.size() < 1)
     {
-        client.fillOutBuffer(ERR_NEEDMOREPARAMS, _server.getEfd());
+        client.fillOutBuffer(Reply::sendReply(461, client.getNick(), "ERR_NEEDMOREPARAMS").c_str(), _server.getEfd());
         return;
     }
 
@@ -105,11 +104,11 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
     // to be able to know in which one he's in.
     
     if (cmd.params.size() < 1)
-        return client.fillOutBuffer(ERR_NEEDMOREPARAMS, _server.getEfd());
+        return client.fillOutBuffer(Reply::sendReply(461, client.getNick(), "ERR_NEEDMOREPARAMS").c_str(), _server.getEfd());
     if (cmd.params[0][0] != '#' && cmd.params[0][0] != '&')
-        return client.fillOutBuffer(ERR_NOSUCHCHANNEL, _server.getEfd());
+        return client.fillOutBuffer(Reply::sendReply(403, client.getNick(), "ERR_NOSUCHCHANNEL").c_str(), _server.getEfd());
 
-    std::string name = cmd.params[0].substr(1, cmd.params[0].size());
+    std::string name = cmd.params[0];
 
     Channel* channel = _server.getChannelByName(name);
     if (!channel) {
@@ -123,9 +122,9 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
         std::cout << client.getNick() << " joined " << name << std::endl;
     }
 }
-void CommandHandler::_quit(Client& client, const Command& cmd) {
+void CommandHandler::_part(Client& client, const Command& cmd) {
     if (cmd.params.size() < 1)
-        return client.fillOutBuffer(ERR_NEEDMOREPARAMS, _server.getEfd());
+        return client.fillOutBuffer(Reply::sendReply(461, client.getNick(), "ERR_NEEDMOREPARAMS").c_str(), _server.getEfd());
     
     Channel* channelToQuit = _server.getChannelByName(cmd.params[0]);
     if (!channelToQuit)
@@ -134,12 +133,12 @@ void CommandHandler::_quit(Client& client, const Command& cmd) {
 
     if (channelToQuit->removeClient(&client)) {
         // TODO
-        return client.fillOutBuffer("SUCCESS", _server.getEfd());
+        return client.fillOutBuffer("SUCCESS\n", _server.getEfd());
     }
 
     return client.fillOutBuffer("FAILURE", _server.getEfd());
 }
-void CommandHandler::_msg(Client& client, const Command& cmd) {
+void CommandHandler::_prvmsg(Client& client, const Command& cmd) {
     if (client.channels.empty())
         return;
     else
