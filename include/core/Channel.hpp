@@ -19,10 +19,14 @@ class Channel {
         Channel(Client * client, std::string name);
 
         void    addClient(Client* newClient);
-        bool    removeClient(Client* oldClient);
+        void    removeClient(Client* oldClient);
+        Client* findClient(Client& client);
 
-        void            setTopic(std::string newTopic);
-        std::string     getTopic();
+        void                    setName(std::string& newName);
+        const std::string&      getName() const;
+
+        void                    setTopic(std::string& newTopic);
+        const std::string&      getTopic() const;
 
         ~Channel();
 };
