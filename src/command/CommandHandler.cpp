@@ -118,6 +118,24 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
         channel->_clients[i]->fillOutBuffer(Reply::relayJoin(*channel->_clients[i], name).c_str(), _server.getEfd());
         i++;
     }
+    if (channel->getTopic().empty())
+    {
+        // client.fillOutBuffer(Reply::noTopic(client, name).c_str(), _server.getEfd());
+    }
+    else
+    {
+        // client.fillOutBuffer(Reply::topic(client, name, "Topic").c_str(), _server.getEfd());
+    }
+    i = 0;
+    std::string names;
+    while (i < channel->_clients.size())
+    {
+        names += channel->_clients[i]->getNick() + " ";
+        std::cout << names << std::endl;
+        i++;
+    }
+    client.fillOutBuffer(Reply::namReply(client, name, names).c_str(), _server.getEfd());
+    client.fillOutBuffer(Reply::endOfNames(client, name).c_str(), _server.getEfd());
 }
 void CommandHandler::_part(Client& client, const Command& cmd) {
     if (cmd.params.size() < 1)
