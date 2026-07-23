@@ -102,6 +102,7 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
     if (!channel) {
         Channel newChannel(&client, name);
         _server.createNewChannel(&client, name, newChannel);
+        channel = _server.getChannelByName(name);
         std::cout << client.getNick() << "Create and join: " << name << std::endl;
         // TODO: envoyer JOIN + réponse serveur
     } else {
@@ -114,7 +115,7 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
 
     while (i < channel->_clients.size())
     {
-        client.fillOutBuffer(Reply::relayJoin(channel->_clients[i], name).c_str(), _server.getEfd());
+        channel->_clients[i]->fillOutBuffer(Reply::relayJoin(*channel->_clients[i], name).c_str(), _server.getEfd());
         i++;
     }
 }
