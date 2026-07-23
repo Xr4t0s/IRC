@@ -103,37 +103,23 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
         Channel newChannel(&client, name);
         _server.createNewChannel(&client, name, newChannel);
         channel = _server.getChannelByName(name);
-        std::cout << client.getNick() << "Create and join: " << name << std::endl;
-        // TODO: envoyer JOIN + réponse serveur
     } else {
         channel->addClient(&client);
         client.channels.push_back(channel);
-        std::cout << client.getNick() << " joined " << name << std::endl;
     }
 
-    size_t i = 0;
+    for (size_t i = 0; i < channel->_clients.size(); i++)
+        channel->_clients[i]->fillOutBuffer(Reply::relayJoin(client, name).c_str(), _server.getEfd());
 
-    while (i < channel->_clients.size())
-    {
-        channel->_clients[i]->fillOutBuffer(Reply::relayJoin(*channel->_clients[i], name).c_str(), _server.getEfd());
-        i++;
-    }
-    if (channel->getTopic().empty())
-    {
-        // client.fillOutBuffer(Reply::noTopic(client, name).c_str(), _server.getEfd());
-    }
-    else
-    {
-        // client.fillOutBuffer(Reply::topic(client, name, "Topic").c_str(), _server.getEfd());
-    }
-    i = 0;
+    if (channel->getTopic().empty()) {}
+        // todo! client.fillOutBuffer(Reply::noTopic(client, name).c_str(), _server.getEfd());
+    else {}
+        // todo! client.fillOutBuffer(Reply::topic(client, name, "Topic").c_str(), _server.getEfd());
+    
     std::string names;
-    while (i < channel->_clients.size())
-    {
+    for (size_t i = 0; i < channel->_clients.size(); i++)
         names += channel->_clients[i]->getNick() + " ";
-        std::cout << names << std::endl;
-        i++;
-    }
+
     client.fillOutBuffer(Reply::namReply(client, name, names).c_str(), _server.getEfd());
     client.fillOutBuffer(Reply::endOfNames(client, name).c_str(), _server.getEfd());
 }
