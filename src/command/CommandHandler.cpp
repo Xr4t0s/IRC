@@ -109,6 +109,14 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
         client.channels.push_back(channel);
         std::cout << client.getNick() << " joined " << name << std::endl;
     }
+
+    size_t i = 0;
+
+    while (i < channel->_clients.size())
+    {
+        client.fillOutBuffer(Reply::relayJoin(channel->_clients[i], name).c_str(), _server.getEfd());
+        i++;
+    }
 }
 void CommandHandler::_part(Client& client, const Command& cmd) {
     if (cmd.params.size() < 1)

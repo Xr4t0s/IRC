@@ -27,4 +27,13 @@ bool    Channel::removeClient(Client* oldClient) {
 
 }
 
+void    Channel::setTopic(std::string newTopic) {
+    _topic = newTopic;
+    return;
+}
+
+std::string Channel::getTopic() {
+    return _topic;
+}
+
 Channel::~Channel() {}
