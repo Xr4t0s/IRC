@@ -130,14 +130,13 @@ void CommandHandler::_part(Client& client, const Command& cmd) {
     Channel* channelToQuit = _server.getChannelByName(cmd.params[0]);
     if (!channelToQuit)
         // TODO
-        return client.fillOutBuffer("ERR_NOCHANNEL", _server.getEfd());
-
-    if (channelToQuit->removeClient(&client)) {
-        // TODO
-        return client.fillOutBuffer("SUCCESS\n", _server.getEfd());
+        return client.fillOutBuffer(Reply::noSuchChannel(client, cmd.params[0]).c_str(), _server.getEfd());
+        
+    if (channelToQuit->findClient(client)) {
+        for (size_t i = 0; i < channelToQuit->_clients.size(); i++)
+            channelToQuit->_clients[i]->fillOutBuffer(Reply::relayPart(client, channelToQuit->getName(), "User decided to quit").c_str(), _server.getEfd());
+        channelToQuit->removeClient(&client);
     }
-
-    return client.fillOutBuffer("FAILURE", _server.getEfd());
 }
 void CommandHandler::_prvmsg(Client& client, const Command& cmd) {
     if (client.channels.empty())
