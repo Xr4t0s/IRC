@@ -1,6 +1,7 @@
 #include "command/CommandHandler.hpp"
 #include "core/Server.hpp"
 #include "command/Reply.hpp"
+#include "utils/Utils.hpp"
 
 //PASS/USER ERR
 // static const char *ERR_NEEDMOREPARAMS = "461 ERR_NEEDMOREPARAMS";
@@ -22,7 +23,7 @@ CommandHandler::CommandHandler(Server& server) : _server(server) {
     _cmds["USER"] = &CommandHandler::_user;
     _cmds["JOIN"] = &CommandHandler::_join;
     _cmds["PART"] = &CommandHandler::_part;
-    _cmds["PRVMSG"] = &CommandHandler::_prvmsg;
+    _cmds["PRIVMSG"] = &CommandHandler::_privmsg;
 }
 
 void CommandHandler::execute(Client& client, const Command& cmd) {
@@ -138,31 +139,41 @@ void CommandHandler::_part(Client& client, const Command& cmd) {
         channelToQuit->removeClient(&client);
     }
 }
-void CommandHandler::_prvmsg(Client& client, const Command& cmd) {
+void CommandHandler::_privmsg(Client& client, const Command& cmd) {
     if (cmd.params.size() < 1)
         client.fillOutBuffer(Reply::noRecipient(client, cmd.command).c_str(), _server.getEfd());
     if (cmd.params.size() < 2 || cmd.params[1].empty())
         client.fillOutBuffer(Reply::noTextToSend(client).c_str(), _server.getEfd());
-    std::string params = cmd.params[1];
-    while (params.empty() == false)
+    
+    std::vector<std::string> tmp = splitBy(cmd.params[0], ',');
+    std::vector<std::string>::iterator it = tmp.begin();
+    while (it != tmp.end())
     {
-        // if (params[0] == '&' || params[0] == '#')
-        // {
-        //     std::string tmp = params.substr(0, params.find(','));
-        //     params.erase(0, tmp.size() + 1);
+        if ((*it)[0] == '&' || (*it)[0] == '#')
+        {
+            Channel * channel = _server.getChannelByName((*it));
 
-        //     Channel * channel = _server.getChannelByName(tmp);
-        //     if (channel == NULL)
-        //         return;
+            if (channel == NULL)
+                return client.fillOutBuffer(Reply::noSuchChannel(client, *it).c_str(), _server.getEfd());
+            
+            if (channel->findClient(client) == NULL)
+                return client.fillOutBuffer(Reply::cannotSendToChan(client, *it).c_str(), _server.getEfd());
 
-        // }
-        // else
-        // {
-        //     //nick
-        // }
+            for (size_t i = 0; i < channel->_clients.size(); i++)
+            {
+                if (client.getNick() != channel->_clients[i]->getNick())
+                    channel->_clients[i]->fillOutBuffer(Reply::relayPrivmsg(client, *it, cmd.params[1]).c_str(), _server.getEfd());
+            }
+        }
+        else
+        {
+            Client * target = _server.getClientByNick(*it);
+            if (target == NULL)
+                return client.fillOutBuffer(Reply::noSuchNick(client, *it).c_str(), _server.getEfd());
+            target->fillOutBuffer(Reply::relayPrivmsg(client, (*it), cmd.params[1]).c_str(), _server.getEfd()); 
+        }
+        it++;
     }
-        
-
 }
 
 CommandHandler::~CommandHandler() {}

@@ -23,7 +23,7 @@ class CommandHandler {
         void    _user(Client& client, const Command& cmd);
         void    _join(Client& client, const Command& cmd);
         void    _part(Client& client, const Command& cmd);
-        void    _prvmsg(Client& client, const Command& cmd);
+        void    _privmsg(Client& client, const Command& cmd);
 
     public:
         CommandHandler(Server& server);

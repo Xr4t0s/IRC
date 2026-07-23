@@ -118,6 +118,10 @@ std::string Reply::relayJoin(Client& src, const std::string& channel) {
     return ":" + src.getNick() + "!" + src.getUser() + "@localhost JOIN " + channel + "\r\n";
 }
 
+std::string Reply::relayPrivmsg(Client& src, const std::string& target, const std::string& text) {
+    return ":" + src.getNick() + "!" + src.getUser() + "@localhost PRIVMSG " + target + " :" + text + "\r\n";
+}
+
 std::string Reply::relayNick(Client& src, const std::string& oldNick, const std::string& newNick) {
     return ":" + oldNick + "!" + src.getUser() + "@localhost NICK :" + newNick + "\r\n";
 }
@@ -143,6 +147,22 @@ std::string Reply::noTextToSend(Client& client) {
         412,
         (client.getNick().empty() ? "*" : client.getNick()),
         "No text to send"
+    );
+}
+
+std::string Reply::noSuchNick(Client& client, const std::string& nick) {
+    return _serializeNumeric(
+        401,
+        (client.getNick().empty() ? "*" : client.getNick()),
+        "ERR_NOSUCHNICK -> " + nick
+    );
+}
+
+std::string Reply::cannotSendToChan(Client& client, const std::string& channel) {
+    return _serializeNumeric(
+        404,
+        (client.getNick().empty() ? "*" : client.getNick()) + " " + channel,
+        "Cannot send to channel"
     );
 }
 
