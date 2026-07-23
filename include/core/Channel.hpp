@@ -9,6 +9,7 @@ class Channel {
     private:
 
         std::string             _name;
+        std::string             _topic;
         
     public:
 
@@ -19,6 +20,9 @@ class Channel {
 
         void    addClient(Client* newClient);
         bool    removeClient(Client* oldClient);
+
+        void            setTopic(std::string newTopic);
+        std::string     getTopic();
 
         ~Channel();
 };
