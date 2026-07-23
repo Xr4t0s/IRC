@@ -191,7 +191,7 @@ void Server::run() {
                 try {
                     _accept_client();
                 } catch (std::exception& e) {
-                    static_cast<void>(e);
+                    std::cout << e.what() << std::endl;
                 }
             }
 

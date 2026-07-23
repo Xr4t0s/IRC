@@ -10,6 +10,7 @@ Channel::Channel(Client * client, std::string name) : _name(name) {
 void    Channel::addClient(Client* newClient) {
     this->_clients.push_back(newClient);
 }
+
 bool    Channel::removeClient(Client* oldClient) {
     std::vector<Client *>::iterator it = this->_clients.begin();
     std::vector<Client *>::iterator ite = this->_clients.end();
