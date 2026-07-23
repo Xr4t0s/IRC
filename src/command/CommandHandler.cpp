@@ -34,6 +34,13 @@ void CommandHandler::execute(Client& client, const Command& cmd) {
     (this->*h)(client, cmd);
 }
 
+void CommandHandler::completeRegistration(Client& client) {
+    if (client._hasNick && client._hasUsername && client._hasPassword)
+    {
+        client.registered = true;
+        return client.fillOutBuffer(Reply::welcome(client).c_str(), _server.getEfd());
+    }
+}
 void CommandHandler::_pass(Client& client, const Command& cmd) {
     if (client.registered == true)
         return client.fillOutBuffer(Reply::alreadyRegistered(client).c_str(), _server.getEfd());
@@ -46,8 +53,7 @@ void CommandHandler::_pass(Client& client, const Command& cmd) {
     else
         client.fillOutBuffer(Reply::passwdMismatch(client).c_str(), _server.getEfd());
     
-    if (client._hasNick && client._hasUsername && client._hasPassword)
-        client.registered = true;
+    return completeRegistration(client);
 }
 void CommandHandler::_nick(Client& client, const Command& cmd) {
 
@@ -64,8 +70,7 @@ void CommandHandler::_nick(Client& client, const Command& cmd) {
     client.setNick(cmd.params[0]);
     std::cout << client.getNick() << std::endl;// console log
 
-    if (client._hasNick && client._hasUsername && client._hasPassword)
-        client.registered = true;
+    return completeRegistration(client);
 }
 void CommandHandler::_user(Client& client, const Command& cmd) {
     if (client.registered == true)
@@ -78,8 +83,7 @@ void CommandHandler::_user(Client& client, const Command& cmd) {
 
     //TODO: handle realName [USER < username > '' '' < :realName > ]
 
-    if (client._hasNick && client._hasUsername && client._hasPassword)
-        client.registered = true;
+    return completeRegistration(client);
 }
 void CommandHandler::_join(Client& client, const Command& cmd) {
     // Create channel if does not already exist.
