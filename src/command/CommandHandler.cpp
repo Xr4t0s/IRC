@@ -128,15 +128,18 @@ void CommandHandler::_part(Client& client, const Command& cmd) {
     if (cmd.params.size() < 1)
         return client.fillOutBuffer(Reply::needMoreParams(client, cmd.command).c_str(), _server.getEfd());
     
-    Channel* channelToQuit = _server.getChannelByName(cmd.params[0]);
-    if (!channelToQuit)
-        // TODO
-        return client.fillOutBuffer(Reply::noSuchChannel(client, cmd.params[0]).c_str(), _server.getEfd());
-        
-    if (channelToQuit->findClient(client)) {
-        for (size_t i = 0; i < channelToQuit->_clients.size(); i++)
-            channelToQuit->_clients[i]->fillOutBuffer(Reply::relayPart(client, channelToQuit->getName(), "User decided to quit").c_str(), _server.getEfd());
-        channelToQuit->removeClient(&client);
+    std::vector<std::string> channelsToQuit = splitBy(cmd.params[0], ',');
+    for (size_t i = 0; i < channelsToQuit.size(); i++) {
+        Channel* channelToQuit = _server.getChannelByName(channelsToQuit[i]);
+        if (!channelToQuit)
+            return client.fillOutBuffer(Reply::noSuchChannel(client, channelsToQuit[0]).c_str(), _server.getEfd());
+            
+        if (channelToQuit->findClient(client)) {
+            for (size_t i = 0; i < channelToQuit->_clients.size(); i++)
+                channelToQuit->_clients[i]->fillOutBuffer(Reply::relayPart(client, channelToQuit->getName(), "User decided to quit").c_str(), _server.getEfd());
+            channelToQuit->removeClient(&client);
+        } else
+            return client.fillOutBuffer(Reply::notOnChannel(client, channelToQuit->getName()).c_str(), _server.getEfd());
     }
 }
 void CommandHandler::_privmsg(Client& client, const Command& cmd) {
