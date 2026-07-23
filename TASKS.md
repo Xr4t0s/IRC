@@ -60,21 +60,21 @@ Regroupé par phase, dans l'ordre logique d'implémentation.
 
 - [x] `PASS` (vérifier mot de passe, `ERR_PASSWDMISMATCH` 464)
 - [x] `NICK` (unicité, format, `ERR_NICKNAMEINUSE` 433, `ERR_ERRONEUSNICKNAME` 432)
-- [~] `USER` (username + realname via trailing)
-- [~] Passage `registered` quand PASS+NICK+USER OK → `RPL_WELCOME` 001
-- [ ] Rejet des commandes avant registration (`ERR_NOTREGISTERED` 451)
+- [x] `USER` (username + realname via trailing)
+- [x] Passage `registered` quand PASS+NICK+USER OK → `RPL_WELCOME` 001
+- [x] Rejet des commandes avant registration (`ERR_NOTREGISTERED` 451)
 - [ ] `PING` / `PONG` (garder la connexion vivante)
-- [~] `QUIT` (déconnexion propre, notifier les channels)
+- [x] `QUIT` (déconnexion propre, notifier les channels)
 
 ## Phase 6 — Channels
 
-- [ ] Classe `Channel` : membres, opérateurs, topic, clé, limite, modes
-- [~] `JOIN` (créer/rejoindre, `RPL_NAMREPLY` 353, `RPL_ENDOFNAMES` 366)
-- [ ] `PART` (quitter un channel)
-- [~] `PRIVMSG` vers un channel (broadcast aux membres) et vers un nick
+- [~] Classe `Channel` : membres, opérateurs, topic, clé, limite, modes
+- [x] `JOIN` (créer/rejoindre, `RPL_NAMREPLY` 353, `RPL_ENDOFNAMES` 366)
+- [x] `PART` (quitter un channel)
+- [x] `PRIVMSG` vers un channel (broadcast aux membres) et vers un nick
 - [ ] `NOTICE`
 - [ ] `TOPIC` (voir / définir, `RPL_TOPIC` 332 / `RPL_NOTOPIC` 331)
-- [ ] Broadcast propre (exclure l'émetteur quand il faut)
+- [~] Broadcast propre (exclure l'émetteur quand il faut)
 
 ## Phase 7 — Opérateurs & modes
 
