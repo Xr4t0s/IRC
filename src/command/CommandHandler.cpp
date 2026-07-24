@@ -104,7 +104,10 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
         Channel newChannel(&client, name);
         _server.createNewChannel(&client, name, newChannel);
         channel = _server.getChannelByName(name);
+        channel->addOperator(&client);
     } else {
+        //TODO: check si sur invitation
+        //TODO: si y'a un mot de passe
         channel->addClient(&client);
         client.channels.push_back(channel);
     }
