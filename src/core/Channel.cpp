@@ -103,7 +103,7 @@ const std::string& Channel::getName() const {
     return _name;
 }
 
-void    Channel::setTopic(std::string& newTopic) {
+void    Channel::setTopic(const std::string& newTopic) {
     _topic = newTopic;
     return;
 }

@@ -41,7 +41,7 @@ class Channel {
         void                    setName(std::string& newName);
         const std::string&      getName() const;
 
-        void                    setTopic(std::string& newTopic);
+        void                    setTopic(const std::string& newTopic);
         const std::string&      getTopic() const;
 
         ~Channel();

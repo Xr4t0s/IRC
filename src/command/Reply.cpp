@@ -118,6 +118,10 @@ std::string Reply::relayJoin(Client& src, const std::string& channel) {
     return ":" + src.getNick() + "!" + src.getUser() + "@localhost JOIN " + channel + "\r\n";
 }
 
+std::string Reply::relayTopic(Client& src, const std::string& channel, const std::string& topic) {
+    return ":" + src.getNick() + "!" + src.getUser() + "@localhost TOPIC " + channel + " :" + topic + "\r\n";
+}
+
 std::string Reply::relayPrivmsg(Client& src, const std::string& target, const std::string& text) {
     return ":" + src.getNick() + "!" + src.getUser() + "@localhost PRIVMSG " + target + " :" + text + "\r\n";
 }
@@ -163,6 +167,30 @@ std::string Reply::cannotSendToChan(Client& client, const std::string& channel) 
         404,
         (client.getNick().empty() ? "*" : client.getNick()) + " " + channel,
         "Cannot send to channel"
+    );
+}
+
+std::string Reply::noTopic(Client& client, const std::string& channel) {
+    return _serializeNumeric(
+        331,
+        (client.getNick().empty() ? "*" : client.getNick()) + " " + channel,
+        "No topic is set"
+    );
+}
+
+std::string Reply::topic(Client& client, const std::string& channel, const std::string& topic) {
+    return _serializeNumeric(
+        332,
+        (client.getNick().empty() ? "*" : client.getNick()) + " " + channel,
+        topic
+    );
+}
+
+std::string Reply::chanOprivsNeeded(Client& client, const std::string& channel) {
+    return _serializeNumeric(
+        482,
+        (client.getNick().empty() ? "*" : client.getNick()) + " " + channel,
+        "You're not channel operator"
     );
 }
 
