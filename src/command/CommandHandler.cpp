@@ -98,35 +98,38 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
     if (cmd.params[0][0] != '#' && cmd.params[0][0] != '&')
         return client.fillOutBuffer(Reply::noSuchChannel(client, cmd.params[0]).c_str(), _server.getEfd());
 
-    std::string name = cmd.params[0];
+    std::vector<std::string> channels = splitBy(cmd.params[0], ',');
+    for (size_t i = 0; i < channels.size(); i++) {
+        std::string name = channels[i];
 
-    Channel* channel = _server.getChannelByName(name);
-    if (!channel) {
-        Channel newChannel(&client, name);
-        _server.createNewChannel(&client, name, newChannel);
-        channel = _server.getChannelByName(name);
-        channel->addOperator(&client);
-    } else {
-        //TODO: check si sur invitation
-        //TODO: si y'a un mot de passe
-        channel->addClient(&client);
-        client.channels.push_back(channel);
+        Channel* channel = _server.getChannelByName(name);
+        if (!channel) {
+            Channel newChannel(&client, name);
+            _server.createNewChannel(&client, name, newChannel);
+            channel = _server.getChannelByName(name);
+            channel->addOperator(&client);
+        } else {
+            //TODO: check si sur invitation
+            //TODO: si y'a un mot de passe
+            channel->addClient(&client);
+            client.channels.push_back(channel);
+        }
+
+        for (size_t i = 0; i < channel->_clients.size(); i++)
+            channel->_clients[i]->fillOutBuffer(Reply::relayJoin(client, name).c_str(), _server.getEfd());
+
+        if (channel->getTopic().empty())
+            client.fillOutBuffer(Reply::noTopic(client, channel->getName()).c_str(), _server.getEfd());
+        else
+            client.fillOutBuffer(Reply::topic(client, channel->getName(), channel->getTopic()).c_str(), _server.getEfd());
+        
+        std::string names;
+        for (size_t i = 0; i < channel->_clients.size(); i++)
+            names += channel->_clients[i]->getNick() + " ";
+
+        client.fillOutBuffer(Reply::namReply(client, name, names).c_str(), _server.getEfd());
+        client.fillOutBuffer(Reply::endOfNames(client, name).c_str(), _server.getEfd());
     }
-
-    for (size_t i = 0; i < channel->_clients.size(); i++)
-        channel->_clients[i]->fillOutBuffer(Reply::relayJoin(client, name).c_str(), _server.getEfd());
-
-    if (channel->getTopic().empty())
-        client.fillOutBuffer(Reply::noTopic(client, channel->getName()).c_str(), _server.getEfd());
-    else
-        client.fillOutBuffer(Reply::topic(client, channel->getName(), channel->getTopic()).c_str(), _server.getEfd());
-    
-    std::string names;
-    for (size_t i = 0; i < channel->_clients.size(); i++)
-        names += channel->_clients[i]->getNick() + " ";
-
-    client.fillOutBuffer(Reply::namReply(client, name, names).c_str(), _server.getEfd());
-    client.fillOutBuffer(Reply::endOfNames(client, name).c_str(), _server.getEfd());
 }
 void CommandHandler::_part(Client& client, const Command& cmd) {
     if (cmd.params.size() < 1)
