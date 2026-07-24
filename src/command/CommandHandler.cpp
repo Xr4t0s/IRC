@@ -125,7 +125,7 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
         
         std::string names;
         for (size_t i = 0; i < channel->_clients.size(); i++)
-            names += channel->_clients[i]->getNick() + " ";
+            names += (channel->isOperator(*channel->_clients[i]) ? "@" : "") + channel->_clients[i]->getNick() + " ";
 
         client.fillOutBuffer(Reply::namReply(client, name, names).c_str(), _server.getEfd());
         client.fillOutBuffer(Reply::endOfNames(client, name).c_str(), _server.getEfd());
