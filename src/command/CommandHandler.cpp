@@ -142,15 +142,26 @@ void CommandHandler::_part(Client& client, const Command& cmd) {
     for (size_t i = 0; i < channelsToQuit.size(); i++) {
         Channel* channelToQuit = _server.getChannelByName(channelsToQuit[i]);
         if (!channelToQuit)
-            return client.fillOutBuffer(Reply::noSuchChannel(client, channelsToQuit[0]).c_str(), _server.getEfd());
+            return client.fillOutBuffer(Reply::noSuchChannel(client, channelsToQuit[i]).c_str(), _server.getEfd());
             
         if (channelToQuit->findClient(client)) {
             for (size_t i = 0; i < channelToQuit->_clients.size(); i++)
-                channelToQuit->_clients[i]->fillOutBuffer(Reply::relayPart(client, channelToQuit->getName(), "User decided to quit").c_str(), _server.getEfd());
+                channelToQuit->_clients[i]->fillOutBuffer(Reply::relayPart(client, channelToQuit->getName(), cmd.params[1]).c_str(), _server.getEfd());
+            if (channelToQuit->isOperator(client))
+                channelToQuit->removeOperator(&client);
+
+            if (channelToQuit->isWhitelisted(client.getNick()))
+                channelToQuit->removeWhitelist(client.getNick());
+
             channelToQuit->removeClient(&client);
+            client.removeChannel(channelToQuit);
+            if (channelToQuit->_clients.empty())
+                _server.deleteChannel(channelToQuit);
+            
         } else
             return client.fillOutBuffer(Reply::notOnChannel(client, channelToQuit->getName()).c_str(), _server.getEfd());
     }
+
 }
 void CommandHandler::_privmsg(Client& client, const Command& cmd) {
     if (cmd.params.size() < 1)
@@ -241,6 +252,9 @@ void CommandHandler::_quit(Client& client, const Command& cmd)
                     list.insert(std::make_pair(tmp->getNick(), tmp));
             }
         }
+        if (client.channels[i]->_clients.empty())
+            _server.deleteChannel(client.channels[i]);
+
     }
 
     std::map<std::string, Client*>::iterator it = list.begin();

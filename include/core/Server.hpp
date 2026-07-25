@@ -36,6 +36,7 @@ class Server {
         Channel*    getChannelByName(const std::string& name);
         bool        createNewChannel(Client* client, std::string name, Channel newChannel);
         void        remove_client(Client& client);
+        void        deleteChannel(Channel * channel);
 
         ~Server();
 

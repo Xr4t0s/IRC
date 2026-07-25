@@ -48,6 +48,18 @@ void Client::setUser(std::string newUser)
     _user = newUser;
 }
 
+void Client::removeChannel(Channel* oldChannel) {
+    std::vector<Channel *>::iterator it = this->channels.begin();
+    std::vector<Channel *>::iterator ite = this->channels.end();
+
+    while(it != ite) {
+        if (*it == oldChannel) {
+            this->channels.erase(it);
+        }
+        ++it;
+    }
+}
+
 void    Client::fillInBuffer(const char* buff) {
         _inBuff.append(buff);
 }
