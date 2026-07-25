@@ -27,24 +27,24 @@ Command parseCommand(const std::string& str) {
         ++i;
 
     // 2. Commande : jusqu'au prochain espace (ou fin de ligne)
-    {
-        size_t space = str.find(' ', i);
-        if (space == std::string::npos) {
-            cmd.command = str.substr(i);   // commande sans paramètre (ex: LIST)
-            return cmd;
-        }
-        cmd.command = str.substr(i, space - i);
-
-        std::string command = str.substr(i, space - i);
-        size_t      commandSize = command.length();
-
-        cmd.command.resize(commandSize);
-        
-        for (size_t i = 0; i < commandSize; i++)
-            cmd.command[i] = std::toupper(command.at(i));
-
-        i = space;
+    size_t space = str.find(' ', i);
+    if (space == std::string::npos) {
+        cmd.command = str.substr(i);   // commande sans paramètre (ex: LIST)
+        for (size_t i = 0; i < cmd.command.size(); i++)
+            cmd.command[i] = std::toupper(cmd.command[i]);
+        return cmd;
     }
+    cmd.command = str.substr(i, space - i);
+
+    std::string command = str.substr(i, space - i);
+    size_t      commandSize = command.length();
+
+    cmd.command.resize(commandSize);
+    
+    for (size_t i = 0; i < commandSize; i++)
+        cmd.command[i] = std::toupper(command.at(i));
+
+    i = space;
 
     // 3. Paramètres
     while (i < len) {

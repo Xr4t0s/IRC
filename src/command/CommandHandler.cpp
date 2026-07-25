@@ -25,6 +25,8 @@ CommandHandler::CommandHandler(Server& server) : _server(server) {
     _cmds["PART"] = &CommandHandler::_part;
     _cmds["PRIVMSG"] = &CommandHandler::_privmsg;
     _cmds["TOPIC"] = &CommandHandler::_topic;
+    _cmds["KICK"] = &CommandHandler::_kick;
+
 }
 
 void CommandHandler::execute(Client& client, const Command& cmd) {
@@ -63,7 +65,7 @@ void CommandHandler::_nick(Client& client, const Command& cmd) {
         // todo: replace ERR_NONICKNAMEGIVEN with Reply::<good_function>
         return client.fillOutBuffer(ERR_NONICKNAMEGIVEN, _server.getEfd());
 
-    if (_server.getClientByNick(cmd.params[0]) != NULL) 
+    if (_server.getClientByNick(cmd.params[0]) != NULL && client.getNick() != cmd.params[0])
         return client.fillOutBuffer(Reply::nicknameInUse(client, cmd.params[0]).c_str(), _server.getEfd());
 
     // TODO: if ( nick has invalid/not compatible characters)
@@ -207,6 +209,16 @@ void CommandHandler::_topic(Client& client, const Command& cmd) {
     channel->setTopic(cmd.params[1]);
     for (size_t i = 0; i < channel->_clients.size(); i++)
         channel->_clients[i]->fillOutBuffer(Reply::relayTopic(client, channel->getName(), cmd.params[1]).c_str(), _server.getEfd());
+}
+
+void CommandHandler::_kick(Client& client, const Command& cmd)
+{
+    if(cmd.params.size() < 2)
+        return client.fillOutBuffer(Reply::needMoreParams(client, cmd.command).c_str(), _server.getEfd());
+
+    Channel* channel = _server.getChannelByName(cmd.params[0]);
+    if(!channel)
+        return client.fillInBuffer(Reply::noSuchChannel(client, cmd.params[0]).c_str());
 }
 
 CommandHandler::~CommandHandler() {}
