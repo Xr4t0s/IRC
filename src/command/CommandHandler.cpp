@@ -258,10 +258,10 @@ void CommandHandler::_kick(Client& client, const Command& cmd) {
 
         Client * target = _server.getClientByNick(users[i]);
         if (!target)
-            return client.fillOutBuffer(Reply::userNotInChannel(client, users[i],channels[i]).c_str(), _server.getEfd());
+            continue;
         if (!channel->findClient(*target)) {
             client.fillOutBuffer(Reply::userNotInChannel(client, users[i],channels[i]).c_str(), _server.getEfd());
-            continue:
+            continue;
         }
         for (size_t y = 0; y < channel->_clients.size(); y++)
             channel->_clients[y]->fillOutBuffer(Reply::relayKick(client, channels[i], users[i], comment).c_str(), _server.getEfd());
