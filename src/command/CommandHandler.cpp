@@ -87,12 +87,15 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
 
     if (cmd.params.size() < 1)
         return client.fillOutBuffer(Reply::needMoreParams(client, cmd.command).c_str(), _server.getEfd());
-    if (cmd.params[0][0] != '#' && cmd.params[0][0] != '&')
-        return client.fillOutBuffer(Reply::noSuchChannel(client, cmd.params[0]).c_str(), _server.getEfd());
 
     std::vector<std::string> channels = splitBy(cmd.params[0], ',');
     for (size_t i = 0; i < channels.size(); i++) {
         std::string name = channels[i];
+
+        if (name[0] != '#' && name[0] != '&') {
+            client.fillOutBuffer(Reply::noSuchChannel(client, name).c_str(), _server.getEfd());
+            continue;
+        }
 
         Channel* channel = _server.getChannelByName(name);
         if (!channel) {
@@ -256,8 +259,10 @@ void CommandHandler::_kick(Client& client, const Command& cmd) {
         Client * target = _server.getClientByNick(users[i]);
         if (!target)
             return client.fillOutBuffer(Reply::userNotInChannel(client, users[i],channels[i]).c_str(), _server.getEfd());
-        if (!channel->findClient(*target))
-            return client.fillOutBuffer(Reply::userNotInChannel(client, users[i],channels[i]).c_str(), _server.getEfd());
+        if (!channel->findClient(*target)) {
+            client.fillOutBuffer(Reply::userNotInChannel(client, users[i],channels[i]).c_str(), _server.getEfd());
+            continue:
+        }
         for (size_t y = 0; y < channel->_clients.size(); y++)
             channel->_clients[y]->fillOutBuffer(Reply::relayKick(client, channels[i], users[i], comment).c_str(), _server.getEfd());
         channel->removeClient(target);
