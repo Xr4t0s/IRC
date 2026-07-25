@@ -98,6 +98,14 @@ std::string Reply::notOnChannel(Client& client, const std::string& channel) {
     );
 }
 
+std::string Reply::inviteOnlyChan(Client& client, const std::string& channel) {
+    return _serializeNumeric(
+        473,
+        (client.getNick().empty() ? "*" : client.getNick()) + " " + channel,
+        "You're not on that channel"
+    );
+}
+
 std::string Reply::userNotInChannel(Client& client, const std::string& nick, const std::string& channel) {
     return _serializeNumeric(
         441,
