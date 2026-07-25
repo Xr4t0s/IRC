@@ -98,6 +98,15 @@ std::string Reply::notOnChannel(Client& client, const std::string& channel) {
     );
 }
 
+std::string Reply::userOnChannel(Client& client, const std::string& nick, const std::string& channel) {
+    static_cast<void>(client);
+    return _serializeNumeric(
+        443,
+        (nick.empty() ? "*" : nick) + " " + channel,
+        "User already on the channel"
+    );
+}
+
 std::string Reply::namReply(Client& client, const std::string& channel, const std::string& names) {
     return _serializeNumeric(
         353,
@@ -140,6 +149,10 @@ std::string Reply::relayPart(Client& src, const std::string& channel, const std:
         ret += " :" + reason;
     ret += "\r\n";
     return ret;
+}
+
+std::string Reply::relayInvite(Client& src, const std::string& targetNick, const std::string& channel) {
+    return ":" + src.getNick() + "!" + src.getUser() + "@localhost INVITE " + targetNick + " " + channel + "\r\n";
 }
 
 std::string Reply::noRecipient(Client& client, const std::string& command) {
@@ -195,6 +208,14 @@ std::string Reply::chanOprivsNeeded(Client& client, const std::string& channel) 
         482,
         (client.getNick().empty() ? "*" : client.getNick()) + " " + channel,
         "You're not channel operator"
+    );
+}
+
+std::string Reply::inviting(Client& client, const std::string& targetNick, const std::string& channel) {
+    return _serializeNumeric(
+        341,
+        (client.getNick().empty() ? "*" : client.getNick()) + " " + targetNick + " " + channel,
+        "Invited " + targetNick
     );
 }
 
