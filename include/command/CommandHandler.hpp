@@ -25,6 +25,8 @@ class CommandHandler {
         void    _part(Client& client, const Command& cmd);
         void    _privmsg(Client& client, const Command& cmd);
         void    _topic(Client& client, const Command& cmd);
+        void    _kick(Client& client, const Command& cmd);
+
 
     public:
         CommandHandler(Server& server);
