@@ -26,6 +26,7 @@ CommandHandler::CommandHandler(Server& server) : _server(server) {
     _cmds["PRIVMSG"] = &CommandHandler::_privmsg;
     _cmds["TOPIC"] = &CommandHandler::_topic;
     _cmds["KICK"] = &CommandHandler::_kick;
+    _cmds["QUIT"] = &CommandHandler::_quit;
 
 }
 
@@ -221,4 +222,37 @@ void CommandHandler::_kick(Client& client, const Command& cmd)
         return client.fillInBuffer(Reply::noSuchChannel(client, cmd.params[0]).c_str());
 }
 
+void CommandHandler::_quit(Client& client, const Command& cmd)
+{
+    std::map<std::string, Client*> list;
+    std::string trail;
+
+    if (cmd.params.size() < 1)
+        trail = "Client quit";
+    for (size_t i = 0; i < client.channels.size(); i++)
+    {
+        for (size_t y = 0; y < client.channels[i]->_clients.size(); y++)
+        {
+            Client * tmp = client.channels[i]->_clients[y];
+            if (client.getNick() != tmp->getNick())
+            {
+                
+                if(list.find(tmp->getNick()) == list.end())
+                    list.insert(std::make_pair<std::string, Client*>(tmp->getNick(), tmp));
+            }
+        }
+    }
+
+    std::map<std::string, Client*>::iterator it = list.begin();
+    std::map<std::string, Client*>::iterator ite = list.end();
+
+    while (it != ite)
+    {
+        it->second->fillOutBuffer(Reply::relayQuit(client, (trail.empty() ? cmd.params[0] : trail)).c_str(), _server.getEfd());
+        it++;
+    }
+
+    _server._remove_client(client.getFd());
+
+}
 CommandHandler::~CommandHandler() {}

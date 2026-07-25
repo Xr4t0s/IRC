@@ -28,6 +28,8 @@ class Client {
 
         std::string extractCommand();
 
+        int getFd();
+
         std::string& getOutBuff();
         std::string& getInBuff();
 
