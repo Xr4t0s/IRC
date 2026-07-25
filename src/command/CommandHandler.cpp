@@ -34,7 +34,8 @@ CommandHandler::CommandHandler(Server& server) : _server(server) {
 void CommandHandler::execute(Client& client, const Command& cmd) {
     std::map<std::string, CommandHandler::Handler>::iterator it = _cmds.find(cmd.command);
 
-    if (it == _cmds.end()) return; // TODO! if (!h) h = ERR_UNKNOWNCOMMAND 421
+    if (it == _cmds.end())
+        return client.fillOutBuffer(Reply::unknownCommand(client, cmd.command).c_str(), _server.getEfd());
 
     Handler h = (*it).second;
     (this->*h)(client, cmd);
@@ -74,7 +75,6 @@ void CommandHandler::_nick(Client& client, const Command& cmd) {
     // fillOutBuffer( ERR_ERRONEUSNICKNAME )
     
     client.setNick(cmd.params[0]);
-    std::cout << client.getNick() << std::endl;// console log
 
     return completeRegistration(client);
 }
@@ -97,6 +97,9 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
     // and add in client classe the name or anything that can relate to the channel
     // to be able to know in which one he's in.
     
+    if (!client.registered)
+        return client.fillOutBuffer(Reply::notRegistered(client).c_str(), _server.getEfd());
+
     if (cmd.params.size() < 1)
         return client.fillOutBuffer(Reply::needMoreParams(client, cmd.command).c_str(), _server.getEfd());
     if (cmd.params[0][0] != '#' && cmd.params[0][0] != '&')
@@ -136,6 +139,9 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
     }
 }
 void CommandHandler::_part(Client& client, const Command& cmd) {
+    if (!client.registered)
+        return client.fillOutBuffer(Reply::notRegistered(client).c_str(), _server.getEfd());
+
     if (cmd.params.size() < 1)
         return client.fillOutBuffer(Reply::needMoreParams(client, cmd.command).c_str(), _server.getEfd());
     
@@ -165,6 +171,9 @@ void CommandHandler::_part(Client& client, const Command& cmd) {
 
 }
 void CommandHandler::_privmsg(Client& client, const Command& cmd) {
+    if (!client.registered)
+        return client.fillOutBuffer(Reply::notRegistered(client).c_str(), _server.getEfd());
+
     if (cmd.params.size() < 1)
         client.fillOutBuffer(Reply::noRecipient(client, cmd.command).c_str(), _server.getEfd());
     if (cmd.params.size() < 2 || cmd.params[1].empty())
@@ -202,6 +211,9 @@ void CommandHandler::_privmsg(Client& client, const Command& cmd) {
 }
 
 void CommandHandler::_topic(Client& client, const Command& cmd) {
+    if (!client.registered)
+        return client.fillOutBuffer(Reply::notRegistered(client).c_str(), _server.getEfd());
+
     if (cmd.params.size() < 1)
         return client.fillOutBuffer(Reply::needMoreParams(client, cmd.command).c_str(), _server.getEfd());
     Channel * channel = _server.getChannelByName(cmd.params[0]);
@@ -224,18 +236,43 @@ void CommandHandler::_topic(Client& client, const Command& cmd) {
         channel->_clients[i]->fillOutBuffer(Reply::relayTopic(client, channel->getName(), cmd.params[1]).c_str(), _server.getEfd());
 }
 
-void CommandHandler::_kick(Client& client, const Command& cmd)
-{
+void CommandHandler::_kick(Client& client, const Command& cmd) {
+    if (!client.registered)
+        return client.fillOutBuffer(Reply::notRegistered(client).c_str(), _server.getEfd());
+
+
     if(cmd.params.size() < 2)
         return client.fillOutBuffer(Reply::needMoreParams(client, cmd.command).c_str(), _server.getEfd());
 
-    Channel* channel = _server.getChannelByName(cmd.params[0]);
-    if(!channel)
-        return client.fillInBuffer(Reply::noSuchChannel(client, cmd.params[0]).c_str());
+    std::string comment = (cmd.params.size() == 3 ? cmd.params[2] : client.getNick());
+
+    std::vector<std::string> channels = splitBy(cmd.params[0], ',');
+    std::vector<std::string> users = splitBy(cmd.params[1], ',');
+
+    for (size_t i = 0; i < channels.size(); i++)
+    {
+        Channel* channel = _server.getChannelByName(channels[i]);
+
+        if(!channel)
+            return client.fillOutBuffer(Reply::noSuchChannel(client, channels[i]).c_str(), _server.getEfd());
+        
+        if (!channel->isOperator(client))
+                return client.fillOutBuffer(Reply::chanOprivsNeeded(client, channels[i]).c_str(), _server.getEfd());
+
+        if (!channel->findClient(client))
+            return client.fillOutBuffer(Reply::notOnChannel(client, channels[i]).c_str(), _server.getEfd());
+
+        Client * target = _server.getClientByNick(users[i]);
+        if (!channel->findClient(*target))
+            return client.fillOutBuffer(Reply::userNotInChannel(client, users[i],channels[i]).c_str(), _server.getEfd());
+        for (size_t y = 0; y < channel->_clients.size(); y++)
+            channel->_clients[y]->fillOutBuffer(Reply::relayKick(client, channels[i], users[i], comment).c_str(), _server.getEfd());
+        channel->removeClient(target);
+        target->removeChannel(channel);
+    }
 }
 
-void CommandHandler::_quit(Client& client, const Command& cmd)
-{
+void CommandHandler::_quit(Client& client, const Command& cmd) {
     std::map<std::string, Client*> list;
     std::string trail;
 

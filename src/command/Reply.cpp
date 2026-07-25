@@ -21,8 +21,8 @@ std::string Reply::_serializeBroadcast(int code, const std::string& target, cons
 std::string Reply::unknownCommand(Client& client, const std::string& command) {
     return _serializeNumeric(
         421,
-        (client.getNick().empty() ? "*" : client.getNick()),
-        "ERR_UNKNOWNCOMMAND FOR COMMAND -> " + command
+        (client.getNick().empty() ? "*" : client.getNick()) + " " + command,
+        "Unknown command"
     );
 }
 
@@ -30,15 +30,15 @@ std::string Reply::alreadyRegistered(Client& client) {
     return _serializeNumeric(
         462,
         (client.getNick().empty() ? "*" : client.getNick()),
-        "ERR_ALREADYREGISTERED"
+        "You may not reregister"
     );
 }
 
 std::string Reply::needMoreParams(Client& client, const std::string& command) {
     return _serializeNumeric(
         461,
-        (client.getNick().empty() ? "*" : client.getNick()),
-        "ERR_NEEDMOREPARAMS FOR COMMAND -> " + command
+        (client.getNick().empty() ? "*" : client.getNick()) + " " + command,
+        "Not enough parameters"
     );
 }
 
@@ -46,15 +46,15 @@ std::string Reply::passwdMismatch(Client& client) {
     return _serializeNumeric(
         464,
         (client.getNick().empty() ? "*" : client.getNick()),
-        "ERR_PASSWDMISMATCH"
+        "Password incorrect"
     );
 }
 
 std::string Reply::noSuchChannel(Client& client, const std::string& channel) {
     return _serializeNumeric(
         403,
-        (client.getNick().empty() ? "*" : client.getNick()),
-        "ERR_NOSUCHCHANNEL -> " + channel
+        (client.getNick().empty() ? "*" : client.getNick()) + " " + channel,
+        "No such channel"
     );
 }
 
@@ -70,7 +70,7 @@ std::string Reply::notRegistered(Client& client) {
     return _serializeNumeric(
         451,
         (client.getNick().empty() ? "*" : client.getNick()),
-        "ERR_NOTREGISTERED"
+        "You have not registered"
     );
 }
 
@@ -78,23 +78,31 @@ std::string Reply::noNicknameGiven(Client& client) {
     return _serializeNumeric(
         431,
         (client.getNick().empty() ? "*" : client.getNick()),
-        "ERR_NONICKNAMEGIVEN"
+        "No nickname given"
     );
 }
 
 std::string Reply::nicknameInUse(Client& client, const std::string& nick) {
     return _serializeNumeric(
         433,
-        (client.getNick().empty() ? "*" : client.getNick()),
-        "ERR_NICKNAMEINUSE -> " + nick
+        (client.getNick().empty() ? "*" : client.getNick()) + " " + nick,
+        "Nickname collision KILL"
     );
 }
 
 std::string Reply::notOnChannel(Client& client, const std::string& channel) {
     return _serializeNumeric(
         442,
-        (client.getNick().empty() ? "*" : client.getNick()),
-        "ERR_NOTONCHANNEL -> " + channel
+        (client.getNick().empty() ? "*" : client.getNick()) + " " + channel,
+        "You're not on that channel"
+    );
+}
+
+std::string Reply::userNotInChannel(Client& client, const std::string& nick, const std::string& channel) {
+    return _serializeNumeric(
+        441,
+        (client.getNick().empty() ? "*" : client.getNick())+ " " + nick + " " + channel,
+        "They aren't on that channel"
     );
 }
 
@@ -139,6 +147,10 @@ std::string Reply::relayNick(Client& src, const std::string& oldNick, const std:
     return ":" + oldNick + "!" + src.getUser() + "@localhost NICK :" + newNick + "\r\n";
 }
 
+std::string Reply::relayKick(Client& src, const std::string& channel, const std::string& targetNick, const std::string& comment) {
+    return ":" + src.getNick() + "!" + src.getUser() + "@localhost KICK " + channel + " " + targetNick + " :" + comment + "\r\n";
+}
+
 std::string Reply::relayQuit(Client& src, const std::string& reason) {
     return ":" + src.getNick() + "!" + src.getUser() + "@localhost QUIT :" + reason + "\r\n";
 }
@@ -174,8 +186,8 @@ std::string Reply::noTextToSend(Client& client) {
 std::string Reply::noSuchNick(Client& client, const std::string& nick) {
     return _serializeNumeric(
         401,
-        (client.getNick().empty() ? "*" : client.getNick()),
-        "ERR_NOSUCHNICK -> " + nick
+        (client.getNick().empty() ? "*" : client.getNick()) + " " + nick,
+        "No such nick/channel"
     );
 }
 
