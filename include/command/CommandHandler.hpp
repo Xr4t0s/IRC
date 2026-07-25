@@ -14,6 +14,7 @@ class Server;
 
 class CommandHandler {
     private:
+
         Server& _server;
         typedef void (CommandHandler::*Handler)(Client& client, const Command& cmd);
         std::map<std::string, Handler>  _cmds;
@@ -26,7 +27,7 @@ class CommandHandler {
         void    _privmsg(Client& client, const Command& cmd);
         void    _topic(Client& client, const Command& cmd);
         void    _kick(Client& client, const Command& cmd);
-
+        void    _quit(Client& client, const Command& cmd);
 
     public:
         CommandHandler(Server& server);

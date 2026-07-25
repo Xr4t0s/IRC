@@ -16,6 +16,11 @@ std::string& Client::getOutBuff()
     return _outBuff;
 }
 
+int Client::getFd()
+{
+    return _fd;
+}
+
 std::string& Client::getInBuff()
 {
     return _inBuff;

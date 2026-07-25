@@ -130,6 +130,10 @@ std::string Reply::relayNick(Client& src, const std::string& oldNick, const std:
     return ":" + oldNick + "!" + src.getUser() + "@localhost NICK :" + newNick + "\r\n";
 }
 
+std::string Reply::relayQuit(Client& src, const std::string& reason) {
+    return ":" + src.getNick() + "!" + src.getUser() + "@localhost QUIT :" + reason + "\r\n";
+}
+
 std::string Reply::relayPart(Client& src, const std::string& channel, const std::string& reason) {
     std::string ret = ":" + src.getNick() + "!" + src.getUser() + "@localhost PART " + channel;
     if (!reason.empty())
