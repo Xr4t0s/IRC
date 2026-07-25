@@ -39,6 +39,8 @@ class Client {
         const std::string& getUser() const;
         void setUser(std::string newUser);
 
+        void removeChannel(Channel* oldChannel);
+
         void        fillInBuffer(const char* buff);
         void        fillOutBuffer(const char* buff, int efd);
         bool        hasCompleteCommand() const;

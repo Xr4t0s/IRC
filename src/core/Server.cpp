@@ -325,6 +325,11 @@ void        Server::remove_client(Client& client) {
     this->_remove_client(client.getFd());
 }
 
+void        Server::deleteChannel(Channel * channel) {
+    std::map<std::string, Channel>::iterator it = _channels.find(channel->getName());
+    _channels.erase(it);
+}
+
 void    Server::_accept_client() {
     // On crée laddress du client comme pour notre serveur
     sockaddr_in addr;
