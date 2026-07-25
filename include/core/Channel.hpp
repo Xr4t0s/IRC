@@ -15,10 +15,10 @@ class Channel {
         
     public:
     
-        int     l;
-        bool    i;
-        bool    t;
-        std::string    k;
+        int             l;
+        bool            i;
+        bool            t;
+        std::string     k;
 
 
         std::vector<Client*>    _clients;
