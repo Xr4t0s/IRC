@@ -116,6 +116,11 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
             channel = _server.getChannelByName(name);
             channel->addOperator(&client);
         } else {
+            if (channel->i) {
+                if (!channel->isWhitelisted(client.getNick()))
+                    return client.fillOutBuffer(Reply::inviteOnlyChan(client, channel->getName()).c_str(), _server.getEfd());
+                channel->removeWhitelist(client.getNick());
+            }
             //TODO: check si sur invitation
             //TODO: si y'a un mot de passe
             channel->addClient(&client);
@@ -263,6 +268,8 @@ void CommandHandler::_kick(Client& client, const Command& cmd) {
             return client.fillOutBuffer(Reply::notOnChannel(client, channels[i]).c_str(), _server.getEfd());
 
         Client * target = _server.getClientByNick(users[i]);
+        if (!target)
+            return client.fillOutBuffer(Reply::userNotInChannel(client, users[i],channels[i]).c_str(), _server.getEfd());
         if (!channel->findClient(*target))
             return client.fillOutBuffer(Reply::userNotInChannel(client, users[i],channels[i]).c_str(), _server.getEfd());
         for (size_t y = 0; y < channel->_clients.size(); y++)
