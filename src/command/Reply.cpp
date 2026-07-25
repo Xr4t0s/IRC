@@ -199,6 +199,14 @@ std::string Reply::noSuchNick(Client& client, const std::string& nick) {
     );
 }
 
+std::string Reply::channelIsFull(Client& client, const std::string& channel) {
+    return _serializeNumeric(
+        471,
+        (client.getNick().empty() ? "*" : client.getNick()) + " " + channel,
+        "Cannot join channel (+l)"
+    );
+}
+
 std::string Reply::cannotSendToChan(Client& client, const std::string& channel) {
     return _serializeNumeric(
         404,

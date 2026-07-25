@@ -121,7 +121,8 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
                     return client.fillOutBuffer(Reply::inviteOnlyChan(client, channel->getName()).c_str(), _server.getEfd());
                 channel->removeWhitelist(client.getNick());
             }
-            //TODO: check si sur invitation
+            if (channel->l != -1 && channel->l < static_cast<int>(channel->_clients.size()) + 1)
+                return client.fillOutBuffer(Reply::channelIsFull(client, channel->getName()).c_str(), _server.getEfd());
             //TODO: si y'a un mot de passe
             channel->addClient(&client);
             client.channels.push_back(channel);

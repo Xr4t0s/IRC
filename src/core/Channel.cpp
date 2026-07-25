@@ -1,10 +1,10 @@
 #include "core/Channel.hpp"
 #include "core/Client.hpp"
 
-Channel::Channel() : _name("Random name"), _topic(""), l(-1), i(true), t(false), k("") {}
+Channel::Channel() : _name("Random name"), _topic(""), l(-1), i(false), t(true), k("") {}
 
 // Join command :
-Channel::Channel(Client * client, std::string name) : _name(name), _topic(""), l(-1), i(true), t(false), k("") {
+Channel::Channel(Client * client, std::string name) : _name(name), _topic(""), l(-1), i(false), t(true), k("") {
     _clients.push_back(client);
 }
 
