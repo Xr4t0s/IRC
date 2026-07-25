@@ -238,7 +238,7 @@ void CommandHandler::_quit(Client& client, const Command& cmd)
             {
                 
                 if(list.find(tmp->getNick()) == list.end())
-                    list.insert(std::make_pair<std::string, Client*>(tmp->getNick(), tmp));
+                    list.insert(std::make_pair(tmp->getNick(), tmp));
             }
         }
     }
@@ -252,7 +252,7 @@ void CommandHandler::_quit(Client& client, const Command& cmd)
         it++;
     }
 
-    _server._remove_client(client.getFd());
+    _server.remove_client(client);
 
 }
 CommandHandler::~CommandHandler() {}
