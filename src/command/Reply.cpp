@@ -42,6 +42,14 @@ std::string Reply::needMoreParams(Client& client, const std::string& command) {
     );
 }
 
+std::string Reply::noNicknameGiven(Client& client) {
+    return _serializeNumeric(
+        431,
+        (client.getNick().empty() ? "*" : client.getNick()),
+        "No nickname given"
+    );
+}
+
 std::string Reply::passwdMismatch(Client& client) {
     return _serializeNumeric(
         464,
@@ -71,14 +79,6 @@ std::string Reply::notRegistered(Client& client) {
         451,
         (client.getNick().empty() ? "*" : client.getNick()),
         "You have not registered"
-    );
-}
-
-std::string Reply::noNicknameGiven(Client& client) {
-    return _serializeNumeric(
-        431,
-        (client.getNick().empty() ? "*" : client.getNick()),
-        "No nickname given"
     );
 }
 
