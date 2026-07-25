@@ -3,20 +3,6 @@
 #include "command/Reply.hpp"
 #include "utils/Utils.hpp"
 
-//PASS/USER ERR
-// static const char *ERR_NEEDMOREPARAMS = "461 ERR_NEEDMOREPARAMS";
-// static const char *ERR_PASSWDMISMATCH = "464 ERR_PASSWDMISMATCH";
-// static const char *ERR_ALREADYREGISTRED = "462 ERR_ALREADYREGISTRED";
-
-//NICK ERR
-static const char *ERR_NONICKNAMEGIVEN  = "431 ERR_NONICKNAMEGIVEN";
-// static const char *ERR_ERRONEUSNICKNAME = "432 ERR_ERRONEUSNICKNAME";// not use for now
-// static const char *ERR_NICKNAMEINUSE    = "433 ERR_NICKNAMEINUSE";
-// static const char *ERR_NICKCOLLISION    = "436 ERR_NICKCOLLISION";// not use for now
-
-//JOIN ERR
-// static const char *ERR_NOSUCHCHANNEL  = "403 ERR_NOSUCHCHANNEL";
-
 CommandHandler::CommandHandler(Server& server) : _server(server) {
     _cmds["PASS"] = &CommandHandler::_pass;
     _cmds["NICK"] = &CommandHandler::_nick;
@@ -65,8 +51,7 @@ void CommandHandler::_pass(Client& client, const Command& cmd) {
 void CommandHandler::_nick(Client& client, const Command& cmd) {
 
     if (cmd.params.size() < 1 || cmd.params[0].empty() == true)
-        // todo: replace ERR_NONICKNAMEGIVEN with Reply::<good_function>
-        return client.fillOutBuffer(ERR_NONICKNAMEGIVEN, _server.getEfd());
+        return client.fillOutBuffer(Reply::noNicknameGiven(client).c_str(), _server.getEfd());
 
     if (_server.getClientByNick(cmd.params[0]) != NULL && client.getNick() != cmd.params[0])
         return client.fillOutBuffer(Reply::nicknameInUse(client, cmd.params[0]).c_str(), _server.getEfd());
