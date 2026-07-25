@@ -210,7 +210,6 @@ void Server::run() {
                     int nread = recv(fd, buff, 512, 0);
                     if (nread == 0) {
                         // Si aucun bytes lu mais message correct -> fin de connexion
-                        std::cout << "Removed client" << std::endl;
                         _remove_client(fd);
                         continue;
                     } else if (nread > 0) {
@@ -312,6 +311,20 @@ bool    Server::createNewChannel(Client* client, std::string name, Channel newCh
     return true;
 }
 
+void        Server::remove_client(Client& client) {
+    for (size_t i = 0; i < client.channels.size(); i++) {
+        Channel* channel = client.channels[i];
+        if (channel->isOperator(client))
+            channel->removeOperator(&client);
+        
+        if (channel->isWhitelisted(client.getNick()))
+            channel->removeWhitelist(client.getNick());
+
+        channel->removeClient(&client);
+    }
+    this->_remove_client(client.getFd());
+}
+
 void    Server::_accept_client() {
     // On crée laddress du client comme pour notre serveur
     sockaddr_in addr;
@@ -352,6 +365,7 @@ void    Server::_remove_client(int fd) {
     // On close le fd concerné et on continue notre boucle normalement
     close(fd);
     _clients.erase(fd);
+    std::cout << "Removed client" << std::endl;
 }
 
 Server::~Server() {
