@@ -296,7 +296,7 @@ void CommandHandler::_quit(Client& client, const Command& cmd) {
                     list.insert(std::make_pair(tmp->getNick(), tmp));
             }
         }
-        if (client.channels[i]->_clients.empty())
+        if (client.channels[i]->_clients.size() -1 == 0)
             _server.deleteChannel(client.channels[i]);
 
     }
@@ -407,8 +407,14 @@ void    CommandHandler::_mode(Client& client, const Command& cmd) {
                     targetChannel->k = cmd.params[2 + consumed];
                     changesParams += targetChannel->k + " ";
                     ++consumed;
-                } else
+                } else {
+					if (!targetChannel->k.empty())
+						changesParams += targetChannel->k + " ";
+					else
+						changes.erase(changes.end()--);
                     targetChannel->k.clear();
+					}
+
                 break;
 
             case 'l':
@@ -430,11 +436,11 @@ void    CommandHandler::_mode(Client& client, const Command& cmd) {
                 } else
                     targetChannel->l = -1;
 
-                changesParams += intToString(targetChannel->l);
+                changesParams += intToString(targetChannel->l) + " ";
 
                 break;
 
-            case 'o': {
+            case 'o': {//TODO: fix /MODE -tkio <nick>
                 changes += 'o';
                 if (2 + consumed >= nbParams)
                     return client.fillOutBuffer(
