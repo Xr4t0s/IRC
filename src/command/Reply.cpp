@@ -266,4 +266,8 @@ std::string Reply::unknownMode(Client& client, char mode) {
     );
 }
 
+std::string Reply::relayMode(Client& src, const std::string& channel, const std::string& changes) {
+    return ":" + src.getNick() + "!" + src.getUser() + "@localhost MODE " + channel + " " + changes + "\r\n";
+}
+
 Reply::~Reply() {}

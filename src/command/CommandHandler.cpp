@@ -147,8 +147,10 @@ void CommandHandler::_part(Client& client, const Command& cmd) {
             return client.fillOutBuffer(Reply::noSuchChannel(client, channelsToQuit[i]).c_str(), _server.getEfd());
             
         if (channelToQuit->findClient(client)) {
-            for (size_t i = 0; i < channelToQuit->_clients.size(); i++)
-                channelToQuit->_clients[i]->fillOutBuffer(Reply::relayPart(client, channelToQuit->getName(), cmd.params[1]).c_str(), _server.getEfd());
+            std::string reason = (cmd.params.size() == 2 ? cmd.params[1] : "");
+            std::string channelName = channelToQuit->getName();
+            for (size_t x = 0; x < channelToQuit->_clients.size(); x++)
+                channelToQuit->_clients[x]->fillOutBuffer(Reply::relayPart(client, channelName, reason).c_str(), _server.getEfd());
             if (channelToQuit->isOperator(client))
                 channelToQuit->removeOperator(&client);
 
@@ -350,7 +352,7 @@ void    CommandHandler::_mode(Client& client, const Command& cmd) {
         return client.fillOutBuffer(Reply::noSuchChannel(client, cmd.params[0]).c_str(), _server.getEfd());
     
     if (nbParams == 1)
-        return client.fillOutBuffer(Reply::channelModeIs(client, cmd.params[0], serializeMode(targetChannel)).c_str(), _server.getEfd());
+        return client.fillOutBuffer(Reply::channelModeIs(client, cmd.params[0], serializeMode(targetChannel, client)).c_str(), _server.getEfd());
 
     if (!targetChannel->isOperator(client))
         return client.fillOutBuffer(Reply::chanOprivsNeeded(client, targetChannel->getName()).c_str(), _server.getEfd());
@@ -412,11 +414,51 @@ void    CommandHandler::_mode(Client& client, const Command& cmd) {
                     targetChannel->l = -1;
                 break;
         
+            case 'o': {
+                if (2 + consumed >= nbParams)
+                    return client.fillOutBuffer(
+                        Reply::needMoreParams(client, cmd.command).c_str(),
+                        _server.getEfd()
+                    );
+
+                Client* target = _server.getClientByNick(cmd.params[2 + consumed]);
+                ++consumed;
+
+                if (!target)
+                    return client.fillOutBuffer(
+                        Reply::noSuchNick(client, cmd.params[2 + consumed - 1]).c_str(),
+                        _server.getEfd()
+                    );
+
+                if (!targetChannel->findClient(*target))
+                    return client.fillOutBuffer(
+                        Reply::userNotInChannel(client, target->getNick(), targetChannel->getName()).c_str(),
+                        _server.getEfd()
+                    );
+
+                if (mode)
+                    targetChannel->addOperator(target);
+                else
+                    targetChannel->removeOperator(target);
+
+                break;
+            }
+
             default:
                 client.fillOutBuffer(Reply::unknownMode(client, modes[i]).c_str(), _server.getEfd());
                 break;
         }
     }
+
+    if (nbParams > 1) {
+        std::string channelName = targetChannel->getName();
+        std::string changes = serializeMode(targetChannel, client);
+        for (size_t i = 0; i < targetChannel->_clients.size(); i++) {
+            Client* clientIndex = targetChannel->_clients[i];
+            clientIndex->fillOutBuffer(Reply::relayMode(client, channelName, changes).c_str(), _server.getEfd());
+        }
+    }
+    return ;
 }
 
 CommandHandler::~CommandHandler() {}
