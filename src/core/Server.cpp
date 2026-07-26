@@ -209,8 +209,14 @@ void Server::run() {
                     // On lit depuis le fd
                     int nread = recv(fd, buff, 512, 0);
                     if (nread == 0) {
-                        // Si aucun bytes lu mais message correct -> fin de connexion
-                        _remove_client(fd);
+                        Client* client = this->getClientByFd(fd);
+                        if (!client)
+                            throw Error("Server Misunderstood client");
+                        
+						const char * buff1 = "QUIT :ff\r\n";
+                        client->fillInBuffer(buff1);
+                        while (client->hasCompleteCommand())
+                            _cmdHandler.execute(*client, parseCommand(client->extractCommand()));
                         continue;
                     } else if (nread > 0) {
                         // Ici on imprime juste mais on doit gérer buffer + command ici
