@@ -1,5 +1,6 @@
 #include "utils/Utils.hpp"
 #include "core/Channel.hpp"
+#include "core/Client.hpp"
 #include <sstream>
 #include <climits>
 
@@ -51,7 +52,7 @@ std::vector<std::string> splitBy(const std::string& full, const char sep)
     return result;
 }
 
-std::string serializeMode(Channel* channel) {
+std::string serializeMode(Channel* channel, Client& client) {
     std::string modes = "+";
     std::string params;
 
@@ -64,7 +65,10 @@ std::string serializeMode(Channel* channel) {
     if (!channel->k.empty()) {
         modes += "k";
         params += " ";
-        params += channel->k;
+        if (channel->findClient(client))
+            params += channel->k;
+        else
+            params += "********";
     }
 
     if (channel->l != -1) {
