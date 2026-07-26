@@ -93,7 +93,7 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
     for (size_t i = 0; i < channels.size(); i++) {
         std::string name = channels[i];
 
-        if (name[0] != '#' && name[0] != '&') {
+        if ((name[0] != '#' && name[0] != '&') || name.empty()) {
             client.fillOutBuffer(Reply::noSuchChannel(client, name).c_str(), _server.getEfd());
             continue;
         }
@@ -247,6 +247,9 @@ void CommandHandler::_kick(Client& client, const Command& cmd) {
 
     std::vector<std::string> channels = splitBy(cmd.params[0], ',');
     std::vector<std::string> users = splitBy(cmd.params[1], ',');
+
+	if (channels.empty() || users.empty())
+		return ;
 
     for (size_t i = 0; i < channels.size(); i++)
     {

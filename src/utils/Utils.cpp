@@ -39,6 +39,8 @@ std::vector<std::string> splitBy(const std::string& full, const char sep)
     {
         if (full[i] == sep)
         {
+			if (current.empty())
+				continue;
             result.push_back(current);
             current.clear();
         }
@@ -47,7 +49,8 @@ std::vector<std::string> splitBy(const std::string& full, const char sep)
             current += full[i];
         }
     }
-
+	if (current.empty())
+		return result;
     result.push_back(current);
     return result;
 }
