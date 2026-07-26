@@ -14,6 +14,7 @@ CommandHandler::CommandHandler(Server& server) : _server(server) {
     _cmds["KICK"] = &CommandHandler::_kick;
     _cmds["QUIT"] = &CommandHandler::_quit;
     _cmds["INVITE"] = &CommandHandler::_invite;
+    _cmds["MODE"] = &CommandHandler::_mode;
 
 }
 
@@ -333,6 +334,89 @@ void    CommandHandler::_invite(Client& client, const Command& cmd) {
     
     client.fillOutBuffer(Reply::inviting(client, invited->getNick(), targetChannel->getName()).c_str(), _server.getEfd());
     return invited->fillOutBuffer(Reply::relayInvite(client, invited->getNick(), targetChannel->getName()).c_str(), _server.getEfd());
+}
+
+void    CommandHandler::_mode(Client& client, const Command& cmd) {
+    if (!client.registered)
+        return client.fillOutBuffer(Reply::notRegistered(client).c_str(), _server.getEfd());
+    
+    std::size_t nbParams = cmd.params.size();
+
+    if (nbParams < 1)
+        return client.fillOutBuffer(Reply::needMoreParams(client, cmd.command).c_str(), _server.getEfd());
+
+    Channel* targetChannel = _server.getChannelByName(cmd.params[0]);
+    if (!targetChannel)
+        return client.fillOutBuffer(Reply::noSuchChannel(client, cmd.params[0]).c_str(), _server.getEfd());
+    
+    if (nbParams == 1)
+        return client.fillOutBuffer(Reply::channelModeIs(client, cmd.params[0], serializeMode(targetChannel)).c_str(), _server.getEfd());
+
+    if (!targetChannel->isOperator(client))
+        return client.fillOutBuffer(Reply::chanOprivsNeeded(client, targetChannel->getName()).c_str(), _server.getEfd());
+
+    std::string modes = cmd.params[1];
+    bool        mode = true;
+    std::size_t consumed = 0;
+
+    for (size_t i = 0; i < modes.size(); i++) {
+        switch (modes[i]) {
+            case '+':
+                mode = true;
+                break;
+
+            case '-':
+                mode = false;
+                break;
+
+            case 'i':
+                targetChannel->i = mode;
+                break;
+
+            case 't':
+                if (!targetChannel->isOperator(client))
+                    return client.fillOutBuffer(Reply::chanOprivsNeeded(client, targetChannel->getName()).c_str(), _server.getEfd());
+                targetChannel->t = mode;
+                break;
+
+            case 'k':
+                if (mode) {
+                    if (2 + consumed >= nbParams)
+                        return client.fillOutBuffer(
+                            Reply::needMoreParams(client, cmd.command).c_str(),
+                            _server.getEfd()
+                        );
+
+                    targetChannel->k = cmd.params[2 + consumed];
+                    ++consumed;
+                } else
+                    targetChannel->k.clear();
+                break;
+
+            case 'l':
+                if (mode) {
+                    if (2 + consumed >= nbParams)
+                        return client.fillOutBuffer(
+                            Reply::needMoreParams(client, cmd.command).c_str(),
+                            _server.getEfd()
+                        );
+
+                    int limit = stringToInt(cmd.params[2 + consumed]);
+                    ++consumed;
+
+                    if (limit <= 0)
+                        break;
+
+                    targetChannel->l = limit;
+                } else
+                    targetChannel->l = -1;
+                break;
+        
+            default:
+                client.fillOutBuffer(Reply::unknownMode(client, modes[i]).c_str(), _server.getEfd());
+                break;
+        }
+    }
 }
 
 CommandHandler::~CommandHandler() {}

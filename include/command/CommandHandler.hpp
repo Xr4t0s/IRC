@@ -29,6 +29,7 @@ class CommandHandler {
         void    _kick(Client& client, const Command& cmd);
         void    _quit(Client& client, const Command& cmd);
         void    _invite(Client& client, const Command& cmd);
+        void    _mode(Client& client, const Command& cmd);
 
     public:
         CommandHandler(Server& server);
