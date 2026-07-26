@@ -5,14 +5,17 @@
 Reply::Reply() {}
 
 std::string Reply::_serializeNumeric(int code, const std::string& target, const std::string& trailing) {
-    std::string ret = ":irc.server.net " + intToString(code) + " " + (target.empty() ? "*" : target) + " :" + trailing + "\r\n";
+    std::string ret = ":irc.server.net " + intToString(code) + " " + (target.empty() ? "*" : target)
+        + (trailing.empty() ? "\r\n" : " :" + trailing + "\r\n");
 
     return ret;
 }
 
 std::string Reply::_serializeBroadcast(int code, const std::string& target, const std::vector<std::string> params, const std::string& trailing) {
-    std::string ret = ":irc.server.net " + intToString(code) + " " + (target.empty() ? "*" : target) + " :" + trailing + "\r\n";
+    std::string ret = ":irc.server.net " + intToString(code) + " " + (target.empty() ? "*" : target)
+        + (trailing.empty() ? "\r\n" : " :" + trailing + "\r\n");
     
+    // todo: imprimé les params ou supp la fonction
     static_cast<void>(params);
     
     return ret;
@@ -244,6 +247,22 @@ std::string Reply::inviting(Client& client, const std::string& targetNick, const
         341,
         (client.getNick().empty() ? "*" : client.getNick()) + " " + targetNick + " " + channel,
         "Invited " + targetNick
+    );
+}
+
+std::string Reply::channelModeIs(Client& client, const std::string& channel, const std::string& modes) {
+    return _serializeNumeric(
+        324,
+        (client.getNick().empty() ? "*" : client.getNick()) + " " + channel + " " + modes,
+        ""
+    );
+}
+
+std::string Reply::unknownMode(Client& client, char mode) {
+    return _serializeNumeric(
+        472,
+        (client.getNick().empty() ? "*" : client.getNick()) + " " + std::string(1, mode),
+        "is unknown mode char to me"
     );
 }
 
