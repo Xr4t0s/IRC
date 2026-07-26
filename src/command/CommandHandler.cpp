@@ -260,16 +260,19 @@ void CommandHandler::_kick(Client& client, const Command& cmd) {
 
         if (!channel->findClient(client))
             return client.fillOutBuffer(Reply::notOnChannel(client, channels[i]).c_str(), _server.getEfd());
-
-        Client * target = _server.getClientByNick(users[i]);
-        if (!target || !channel->findClient(*target)) {
-            client.fillOutBuffer(Reply::userNotInChannel(client, users[i],channels[i]).c_str(), _server.getEfd());
-            continue;
-        }
-        for (size_t y = 0; y < channel->_clients.size(); y++)
-            channel->_clients[y]->fillOutBuffer(Reply::relayKick(client, channels[i], users[i], comment).c_str(), _server.getEfd());
-        channel->removeClient(target);
-        target->removeChannel(channel);
+		for (size_t x = 0; x < users.size(); x++) {
+			Client * target = _server.getClientByNick(users[x]);
+			if (!target || !channel->findClient(*target)) {
+				client.fillOutBuffer(Reply::userNotInChannel(client, users[x],channels[i]).c_str(), _server.getEfd());
+				continue;
+			}
+			for (size_t y = 0; y < channel->_clients.size(); y++)
+				channel->_clients[y]->fillOutBuffer(Reply::relayKick(client, channels[i], users[x], comment).c_str(), _server.getEfd());
+			channel->removeClient(target);
+			target->removeChannel(channel);
+			if (channel->isOperator(*target))
+				channel->removeOperator(target);
+		}
     }
 }
 
