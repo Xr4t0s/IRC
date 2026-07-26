@@ -257,9 +257,7 @@ void CommandHandler::_kick(Client& client, const Command& cmd) {
             return client.fillOutBuffer(Reply::notOnChannel(client, channels[i]).c_str(), _server.getEfd());
 
         Client * target = _server.getClientByNick(users[i]);
-        if (!target)
-            continue;
-        if (!channel->findClient(*target)) {
+        if (!target || !channel->findClient(*target)) {
             client.fillOutBuffer(Reply::userNotInChannel(client, users[i],channels[i]).c_str(), _server.getEfd());
             continue;
         }
