@@ -105,6 +105,8 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
             channel = _server.getChannelByName(name);
             channel->addOperator(&client);
         } else {
+            if (channel->findClient(client))
+                return ;
             if (channel->i) {
                 if (!channel->isWhitelisted(client.getNick()))
                     return client.fillOutBuffer(Reply::inviteOnlyChan(client, channel->getName()).c_str(), _server.getEfd());
@@ -284,7 +286,6 @@ void CommandHandler::_quit(Client& client, const Command& cmd) {
             Client * tmp = client.channels[i]->_clients[y];
             if (client.getNick() != tmp->getNick())
             {
-                
                 if(list.find(tmp->getNick()) == list.end())
                     list.insert(std::make_pair(tmp->getNick(), tmp));
             }
@@ -361,27 +362,35 @@ void    CommandHandler::_mode(Client& client, const Command& cmd) {
     bool        mode = true;
     std::size_t consumed = 0;
 
+    std::string changes;
+    std::string changesParams = " ";
+
     for (size_t i = 0; i < modes.size(); i++) {
         switch (modes[i]) {
             case '+':
+                changes += '+';
                 mode = true;
                 break;
 
             case '-':
+                changes += '-';
                 mode = false;
                 break;
 
             case 'i':
+                changes += 'i';
                 targetChannel->i = mode;
                 break;
 
             case 't':
+                changes += 't';
                 if (!targetChannel->isOperator(client))
                     return client.fillOutBuffer(Reply::chanOprivsNeeded(client, targetChannel->getName()).c_str(), _server.getEfd());
                 targetChannel->t = mode;
                 break;
 
             case 'k':
+                changes += 'k';
                 if (mode) {
                     if (2 + consumed >= nbParams)
                         return client.fillOutBuffer(
@@ -390,12 +399,14 @@ void    CommandHandler::_mode(Client& client, const Command& cmd) {
                         );
 
                     targetChannel->k = cmd.params[2 + consumed];
+                    changesParams += targetChannel->k + " ";
                     ++consumed;
                 } else
                     targetChannel->k.clear();
                 break;
 
             case 'l':
+                changes += 'l';
                 if (mode) {
                     if (2 + consumed >= nbParams)
                         return client.fillOutBuffer(
@@ -412,9 +423,13 @@ void    CommandHandler::_mode(Client& client, const Command& cmd) {
                     targetChannel->l = limit;
                 } else
                     targetChannel->l = -1;
+
+                changesParams += intToString(targetChannel->l);
+
                 break;
-        
+
             case 'o': {
+                changes += 'o';
                 if (2 + consumed >= nbParams)
                     return client.fillOutBuffer(
                         Reply::needMoreParams(client, cmd.command).c_str(),
@@ -440,6 +455,8 @@ void    CommandHandler::_mode(Client& client, const Command& cmd) {
                     targetChannel->addOperator(target);
                 else
                     targetChannel->removeOperator(target);
+                    
+                changesParams += target->getNick() + " ";
 
                 break;
             }
@@ -452,10 +469,9 @@ void    CommandHandler::_mode(Client& client, const Command& cmd) {
 
     if (nbParams > 1) {
         std::string channelName = targetChannel->getName();
-        std::string changes = serializeMode(targetChannel, client);
         for (size_t i = 0; i < targetChannel->_clients.size(); i++) {
             Client* clientIndex = targetChannel->_clients[i];
-            clientIndex->fillOutBuffer(Reply::relayMode(client, channelName, changes).c_str(), _server.getEfd());
+            clientIndex->fillOutBuffer(Reply::relayMode(client, channelName, changes + changesParams).c_str(), _server.getEfd());
         }
     }
     return ;
