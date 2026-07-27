@@ -270,4 +270,12 @@ std::string Reply::relayMode(Client& src, const std::string& channel, const std:
     return ":" + src.getNick() + "!" + src.getUser() + "@localhost MODE " + channel + " " + changes + "\r\n";
 }
 
+std::string Reply::badChannelKey(Client& client, const std::string& channel) {
+    return _serializeNumeric(
+        475,
+        (client.getNick().empty() ? "*" : client.getNick()) + " " + channel,
+        "Cannot join channel (+k)"
+    );
+}
+
 Reply::~Reply() {}
