@@ -63,7 +63,7 @@ Regroupé par phase, dans l'ordre logique d'implémentation.
 - [x] `USER` (username + realname via trailing)
 - [x] Passage `registered` quand PASS+NICK+USER OK → `RPL_WELCOME` 001
 - [x] Rejet des commandes avant registration (`ERR_NOTREGISTERED` 451)
-- [ ] `PING` / `PONG` (garder la connexion vivante)
+- [?] `PING` / `PONG` (garder la connexion vivante)
 - [x] `QUIT` (déconnexion propre, notifier les channels)
 
 ## Phase 6 — Channels
@@ -72,24 +72,24 @@ Regroupé par phase, dans l'ordre logique d'implémentation.
 - [x] `JOIN` (créer/rejoindre, `RPL_NAMREPLY` 353, `RPL_ENDOFNAMES` 366)
 - [x] `PART` (quitter un channel)
 - [x] `PRIVMSG` vers un channel (broadcast aux membres) et vers un nick
-- [ ] `NOTICE`
-- [ ] `TOPIC` (voir / définir, `RPL_TOPIC` 332 / `RPL_NOTOPIC` 331)
+- [?] `NOTICE`
+- [x] `TOPIC` (voir / définir, `RPL_TOPIC` 332 / `RPL_NOTOPIC` 331)
 - [~] Broadcast propre (exclure l'émetteur quand il faut)
 
 ## Phase 7 — Opérateurs & modes
 
-- [ ] `KICK` (éjecter un user, `ERR_CHANOPRIVSNEEDED` 482)
-- [ ] `INVITE` (inviter sur un channel)
-- [ ] `MODE +i` / `-i` (invite-only)
-- [ ] `MODE +t` / `-t` (topic réservé aux ops)
-- [ ] `MODE +k` / `-k` (clé du channel)
-- [ ] `MODE +o` / `-o` (donner/retirer op)
-- [ ] `MODE +l` / `-l` (limite de membres)
+- [x] `KICK` (éjecter un user, `ERR_CHANOPRIVSNEEDED` 482)
+- [x] `INVITE` (inviter sur un channel)
+- [x] `MODE +i` / `-i` (invite-only)
+- [x] `MODE +t` / `-t` (topic réservé aux ops)
+- [x] `MODE +k` / `-k` (clé du channel)
+- [x] `MODE +o` / `-o` (donner/retirer op)
+- [x] `MODE +l` / `-l` (limite de membres)
 
 ## Phase 8 — Robustesse & rendu
 
-- [ ] Tester avec un vrai client IRC de référence (irssi / HexChat)
-- [ ] Tester données partielles (paquet coupé au milieu, `nc` avec pipes)
+- [~] Tester avec un vrai client IRC de référence (irssi / HexChat)
+- [x] Tester données partielles (paquet coupé au milieu, `nc` avec pipes)
 - [ ] Aucune fuite mémoire (destruction propre clients/channels)
 - [ ] Nettoyer les `std::cout` de debug
 - [ ] Relire le sujet : fonctions autorisées (`docs/ALLOWED_FUNCTIONS.md`)
