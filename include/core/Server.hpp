@@ -15,6 +15,10 @@
     # define MAX_EVENTS 64
 #endif
 
+#ifndef CLIENT_BUFFER
+    # define CLIENT_BUFFER 4096
+#endif
+
 #include "core/Client.hpp"
 #include "core/Channel.hpp"
 #include "utils/Error.hpp"
