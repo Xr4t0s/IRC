@@ -80,5 +80,8 @@ std::string serializeMode(Channel* channel, Client& client) {
         params += intToString(channel->l);
     }
 
+    if (modes.size() == 1)
+        modes.clear();
+
     return modes + params;
 }

@@ -204,10 +204,10 @@ void Server::run() {
                 if (ev.events & EPOLLIN) {
                     // on crée un buffer pour recv
                     // todo! mettre un #define CLIENT_BUFFER <uint>
-                    char buff[512 + 1];
+                    char buff[CLIENT_BUFFER + 1];
 
                     // On lit depuis le fd
-                    int nread = recv(fd, buff, 512, 0);
+                    int nread = recv(fd, buff, CLIENT_BUFFER, 0);
                     if (nread == 0) {
                         Client* client = this->getClientByFd(fd);
                         if (!client)
@@ -216,7 +216,11 @@ void Server::run() {
 						const char * buff1 = "QUIT :ff\r\n";
                         client->fillInBuffer(buff1);
                         while (client->hasCompleteCommand())
+                        {
                             _cmdHandler.execute(*client, parseCommand(client->extractCommand()));
+                            if (getClientByFd(fd) == NULL)
+                                break ;
+                        }
                         continue;
                     } else if (nread > 0) {
                         // Ici on imprime juste mais on doit gérer buffer + command ici
@@ -226,10 +230,14 @@ void Server::run() {
                         Client* client = this->getClientByFd(fd);
                         if (!client)
                             throw Error("Server Misunderstood client");
-                            
+                        
                         client->fillInBuffer(buff);
                         while (client->hasCompleteCommand())
+                        {
                             _cmdHandler.execute(*client, parseCommand(client->extractCommand()));
+                            if (getClientByFd(fd) == NULL)
+                                break ;
+                        }
                         
                         std::cout << buff << std::endl;
                         
@@ -320,6 +328,9 @@ bool    Server::createNewChannel(Client* client, std::string name, Channel newCh
 void        Server::remove_client(Client& client) {
     for (size_t i = 0; i < client.channels.size(); i++) {
         Channel* channel = client.channels[i];
+        if (!channel)
+            continue ;
+
         if (channel->isOperator(client))
             channel->removeOperator(&client);
         
@@ -332,6 +343,8 @@ void        Server::remove_client(Client& client) {
 }
 
 void        Server::deleteChannel(Channel * channel) {
+    for (size_t i = 0; i < channel->_clients.size(); i++)
+        channel->_clients[i]->removeChannel(channel);
     std::map<std::string, Channel>::iterator it = _channels.find(channel->getName());
     _channels.erase(it);
 }

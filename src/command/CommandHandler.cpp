@@ -296,6 +296,7 @@ void CommandHandler::_quit(Client& client, const Command& cmd) {
                     list.insert(std::make_pair(tmp->getNick(), tmp));
             }
         }
+        
         if (client.channels[i]->_clients.size() - 1 == 0)
             _server.deleteChannel(client.channels[i]);
 
@@ -429,13 +430,12 @@ void    CommandHandler::_mode(Client& client, const Command& cmd) {
 
                     if (limit <= 0)
                         break;
-
+                    
                     targetChannel->l = limit;
+                    changesParams += intToString(targetChannel->l) + " ";
                 } else
                     targetChannel->l = -1;
-
-                changesParams += intToString(targetChannel->l) + " ";
-
+                
                 break;
 
             case 'o': {//TODO: fix /MODE -tkio <nick>
