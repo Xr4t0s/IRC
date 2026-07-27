@@ -296,7 +296,7 @@ void CommandHandler::_quit(Client& client, const Command& cmd) {
                     list.insert(std::make_pair(tmp->getNick(), tmp));
             }
         }
-        if (client.channels[i]->_clients.size() -1 == 0)
+        if (client.channels[i]->_clients.size() - 1 == 0)
             _server.deleteChannel(client.channels[i]);
 
     }
@@ -390,8 +390,6 @@ void    CommandHandler::_mode(Client& client, const Command& cmd) {
 
             case 't':
                 changes += 't';
-                if (!targetChannel->isOperator(client))
-                    return client.fillOutBuffer(Reply::chanOprivsNeeded(client, targetChannel->getName()).c_str(), _server.getEfd());
                 targetChannel->t = mode;
                 break;
 
@@ -411,9 +409,9 @@ void    CommandHandler::_mode(Client& client, const Command& cmd) {
 					if (!targetChannel->k.empty())
 						changesParams += targetChannel->k + " ";
 					else
-						changes.erase(changes.end()--);
+						changes.erase(--changes.end());
                     targetChannel->k.clear();
-					}
+                }
 
                 break;
 
@@ -480,6 +478,8 @@ void    CommandHandler::_mode(Client& client, const Command& cmd) {
     }
 
     if (nbParams > 1) {
+        if (changes.size() == 1)
+            changes.erase(--changes.end());
         std::string channelName = targetChannel->getName();
         for (size_t i = 0; i < targetChannel->_clients.size(); i++) {
             Client* clientIndex = targetChannel->_clients[i];
