@@ -1,4 +1,4 @@
-NAME    	= IRC
+NAME    	= ircserv
 SRC			= $(shell find src -name "*.cpp")
 OBJ_DIR		= build
 OBJ			= $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(SRC))

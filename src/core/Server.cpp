@@ -8,8 +8,8 @@ bool Server::init(char **args) {
     std::cout << "Server stack created\n";
     
     try {
-        _init_pass(args[0]);
-        _init_port(args[1]);
+        _init_pass(args[1]);
+        _init_port(args[0]);
         _init_socket();
         _init_listening();
         _init_epoll();

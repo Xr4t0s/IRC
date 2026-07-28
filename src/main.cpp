@@ -10,7 +10,7 @@ void    sig_handler(int code) {
 int main(int ac, char **av) {
     
     if (ac != 3) {
-        std::cout << "Usage: ./ircserver <password> <port>\n";
+        std::cout << "Usage: ./ircserv <port> <password>\n";
         return 1;
     }    
 
