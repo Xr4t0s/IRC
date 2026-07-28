@@ -90,7 +90,10 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
         return client.fillOutBuffer(Reply::needMoreParams(client, cmd.command).c_str(), _server.getEfd());
 
     std::vector<std::string> channels = splitBy(cmd.params[0], ',');
-    std::size_t consumed = 1;
+    std::vector<std::string> passwords;
+    if (cmd.params.size() > 1)
+        passwords = splitBy(cmd.params[1], ',');
+    std::size_t consumed = 0;
     for (size_t i = 0; i < channels.size(); i++) {
         std::string name = channels[i];
 
@@ -109,7 +112,7 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
             if (channel->findClient(client))
                 return ;
             if (!channel->k.empty()) {
-                if (cmd.params.size() <= consumed || cmd.params[consumed++] != channel->k) {
+                if (passwords.size() <= consumed || passwords[consumed++] != channel->k) {
                     client.fillOutBuffer(Reply::badChannelKey(client, channel->getName()).c_str(), _server.getEfd());
                     continue;
                 }
