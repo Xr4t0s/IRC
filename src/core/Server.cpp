@@ -203,7 +203,6 @@ void Server::run() {
                 epoll_event ev = events[i];
                 if (ev.events & EPOLLIN) {
                     // on crée un buffer pour recv
-                    // todo! mettre un #define CLIENT_BUFFER <uint>
                     char buff[CLIENT_BUFFER + 1];
 
                     // On lit depuis le fd
@@ -224,7 +223,6 @@ void Server::run() {
                         continue;
                     } else if (nread > 0) {
                         // Ici on imprime juste mais on doit gérer buffer + command ici
-                        // todo! implémenter le parsing
                         buff[nread] = '\0';
     
                         Client* client = this->getClientByFd(fd);

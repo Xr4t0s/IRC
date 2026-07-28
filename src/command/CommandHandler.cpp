@@ -44,8 +44,10 @@ void CommandHandler::_pass(Client& client, const Command& cmd) {
 
     if (!cmd.params[0].compare(_server.getPassword()))
         client._hasPassword = true;
-    else
+    else {
+        client._hasPassword = false;
         client.fillOutBuffer(Reply::passwdMismatch(client).c_str(), _server.getEfd());
+    }
     
     return completeRegistration(client);
 }
@@ -124,7 +126,6 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
             }
             if (channel->l != -1 && channel->l < static_cast<int>(channel->_clients.size()) + 1)
                 return client.fillOutBuffer(Reply::channelIsFull(client, channel->getName()).c_str(), _server.getEfd());
-            //TODO: si y'a un mot de passe
             channel->addClient(&client);
             client.channels.push_back(channel);
         }
@@ -155,8 +156,10 @@ void CommandHandler::_part(Client& client, const Command& cmd) {
     std::vector<std::string> channelsToQuit = splitBy(cmd.params[0], ',');
     for (size_t i = 0; i < channelsToQuit.size(); i++) {
         Channel* channelToQuit = _server.getChannelByName(channelsToQuit[i]);
-        if (!channelToQuit)
-            return client.fillOutBuffer(Reply::noSuchChannel(client, channelsToQuit[i]).c_str(), _server.getEfd());
+        if (!channelToQuit) {
+            client.fillOutBuffer(Reply::noSuchChannel(client, channelsToQuit[i]).c_str(), _server.getEfd());
+            continue;
+        }
             
         if (channelToQuit->findClient(client)) {
             std::string reason = (cmd.params.size() == 2 ? cmd.params[1] : "");
@@ -173,9 +176,8 @@ void CommandHandler::_part(Client& client, const Command& cmd) {
             client.removeChannel(channelToQuit);
             if (channelToQuit->_clients.empty())
                 _server.deleteChannel(channelToQuit);
-            
         } else
-            return client.fillOutBuffer(Reply::notOnChannel(client, channelToQuit->getName()).c_str(), _server.getEfd());
+            client.fillOutBuffer(Reply::notOnChannel(client, channelToQuit->getName()).c_str(), _server.getEfd());
     }
 
 }
@@ -196,11 +198,15 @@ void CommandHandler::_privmsg(Client& client, const Command& cmd) {
         {
             Channel * channel = _server.getChannelByName((*it));
 
-            if (channel == NULL)
-                return client.fillOutBuffer(Reply::noSuchChannel(client, *it).c_str(), _server.getEfd());
+            if (channel == NULL) {
+                client.fillOutBuffer(Reply::noSuchChannel(client, *it).c_str(), _server.getEfd());
+                continue;
+            }
             
-            if (channel->findClient(client) == NULL)
-                return client.fillOutBuffer(Reply::cannotSendToChan(client, *it).c_str(), _server.getEfd());
+            if (channel->findClient(client) == NULL) {
+                client.fillOutBuffer(Reply::cannotSendToChan(client, *it).c_str(), _server.getEfd());
+                continue;
+            }
 
             for (size_t i = 0; i < channel->_clients.size(); i++)
             {
@@ -211,8 +217,10 @@ void CommandHandler::_privmsg(Client& client, const Command& cmd) {
         else
         {
             Client * target = _server.getClientByNick(*it);
-            if (target == NULL)
-                return client.fillOutBuffer(Reply::noSuchNick(client, *it).c_str(), _server.getEfd());
+            if (target == NULL) {
+                client.fillOutBuffer(Reply::noSuchNick(client, *it).c_str(), _server.getEfd());
+                continue;
+            }
             target->fillOutBuffer(Reply::relayPrivmsg(client, (*it), cmd.params[1]).c_str(), _server.getEfd()); 
         }
         it++;
