@@ -109,7 +109,7 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
             if (channel->findClient(client))
                 return ;
             if (!channel->k.empty()) {
-                if (cmd.params.size() < consumed + 1 && cmd.params[consumed++] != channel->k) {
+                if (cmd.params.size() <= consumed || cmd.params[consumed++] != channel->k) {
                     client.fillOutBuffer(Reply::badChannelKey(client, channel->getName()).c_str(), _server.getEfd());
                     continue;
                 }
