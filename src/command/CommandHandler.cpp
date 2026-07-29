@@ -99,7 +99,7 @@ void CommandHandler::_join(Client& client, const Command& cmd) {
     for (size_t i = 0; i < channels.size(); i++) {
         std::string name = channels[i];
 
-        if ((name[0] != '#' && name[0] != '&') || name.empty()) {
+        if (name.empty() || (name[0] != '#' && name[0] != '&')) {
             client.fillOutBuffer(Reply::noSuchChannel(client, name).c_str(), _server.getEfd());
             continue;
         }
@@ -200,11 +200,13 @@ void CommandHandler::_privmsg(Client& client, const Command& cmd) {
 
             if (channel == NULL) {
                 client.fillOutBuffer(Reply::noSuchChannel(client, *it).c_str(), _server.getEfd());
+                it++;
                 continue;
             }
             
             if (channel->findClient(client) == NULL) {
                 client.fillOutBuffer(Reply::cannotSendToChan(client, *it).c_str(), _server.getEfd());
+                it++;
                 continue;
             }
 
@@ -219,6 +221,7 @@ void CommandHandler::_privmsg(Client& client, const Command& cmd) {
             Client * target = _server.getClientByNick(*it);
             if (target == NULL) {
                 client.fillOutBuffer(Reply::noSuchNick(client, *it).c_str(), _server.getEfd());
+                it++;
                 continue;
             }
             target->fillOutBuffer(Reply::relayPrivmsg(client, (*it), cmd.params[1]).c_str(), _server.getEfd()); 
