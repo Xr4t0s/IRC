@@ -77,9 +77,6 @@ void CommandHandler::_nick(Client& client, const Command& cmd) {
     std::string oldNick = client.getNick();
     client.setNick(cmd.params[0]);
 
-    if (client.channels.empty())
-        return client.fillOutBuffer(Reply::relayNick(client, oldNick, client.getNick()).c_str(), _server.getEfd());
-
     for (size_t i = 0; i < client.channels.size(); i++)
     {
         for (size_t y = 0; y < client.channels[i]->_clients.size(); y++)
@@ -90,13 +87,15 @@ void CommandHandler::_nick(Client& client, const Command& cmd) {
         }
     }
 
-    std::map<std::string, Client*>::iterator it = list.begin();
-    std::map<std::string, Client*>::iterator ite = list.end();
-
-    while (it != ite)
-    {
-        it->second->fillOutBuffer(Reply::relayNick(client, oldNick, client.getNick()).c_str(), _server.getEfd());
-        it++;
+    if (client.registered) {    
+        std::map<std::string, Client*>::iterator it = list.begin();
+        std::map<std::string, Client*>::iterator ite = list.end();
+        
+        while (it != ite)
+        {
+            it->second->fillOutBuffer(Reply::relayNick(client, oldNick, client.getNick()).c_str(), _server.getEfd());
+            it++;
+        }
     }
 
     return completeRegistration(client);
