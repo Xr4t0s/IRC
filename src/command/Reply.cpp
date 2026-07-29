@@ -53,6 +53,14 @@ std::string Reply::noNicknameGiven(Client& client) {
     );
 }
 
+std::string Reply::erroneusNickname(Client& client, const std::string& badNick) {
+    return _serializeNumeric(
+        432,
+        (client.getNick().empty() ? "*" : client.getNick()) + " " + badNick,
+        "Erroneus nickname"
+    );
+}
+
 std::string Reply::passwdMismatch(Client& client) {
     return _serializeNumeric(
         464,
