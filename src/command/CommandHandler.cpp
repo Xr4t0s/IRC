@@ -29,6 +29,9 @@ void CommandHandler::execute(Client& client, const Command& cmd) {
 }
 
 void CommandHandler::completeRegistration(Client& client) {
+    if(client.registered)
+        return ;
+
     if (client._hasNick && client._hasUsername && client._hasPassword)
     {
         client.registered = true;
@@ -57,13 +60,25 @@ void CommandHandler::_nick(Client& client, const Command& cmd) {
     if (cmd.params.size() < 1 || cmd.params[0].empty() == true)
         return client.fillOutBuffer(Reply::noNicknameGiven(client).c_str(), _server.getEfd());
 
+    const std::string allowed = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-[]\\`_^{}|";
+
+    if (std::isdigit(static_cast<unsigned char>(cmd.params[0][0])) || cmd.params[0][0] == '-')
+        return client.fillOutBuffer(Reply::erroneusNickname(client, cmd.params[0]).c_str(), _server.getEfd());
+    
+    for (size_t i = 0; i < cmd.params[0].size(); i++)
+    {
+        if (allowed.find(cmd.params[0][i]) == std::string::npos)
+            return client.fillOutBuffer(Reply::erroneusNickname(client, cmd.params[0]).c_str(), _server.getEfd());
+    }
+
     if (_server.getClientByNick(cmd.params[0]) != NULL && client.getNick() != cmd.params[0])
         return client.fillOutBuffer(Reply::nicknameInUse(client, cmd.params[0]).c_str(), _server.getEfd());
 
-    // TODO: if ( nick has invalid/not compatible characters)
-    // fillOutBuffer( ERR_ERRONEUSNICKNAME )
     std::string oldNick = client.getNick();
     client.setNick(cmd.params[0]);
+
+    if (client.channels.empty())
+        return client.fillOutBuffer(Reply::relayNick(client, oldNick, client.getNick()).c_str(), _server.getEfd());
 
     for (size_t i = 0; i < client.channels.size(); i++)
     {
