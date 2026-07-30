@@ -24,6 +24,8 @@ void CommandHandler::_nick(Client& client, const Command& cmd) {
 
     std::string oldNick = client.getNick();
     client.setNick(cmd.params[0]);
+	if (client.channels.empty())
+		client.fillOutBuffer(Reply::relayNick(client, oldNick, client.getNick()).c_str(), _server.getEfd());
 
     for (size_t i = 0; i < client.channels.size(); i++)
     {
