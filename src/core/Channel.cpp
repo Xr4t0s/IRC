@@ -18,6 +18,7 @@ void    Channel::removeClient(Client* oldClient) {
     while(it != ite) {
         if (*it == oldClient) {
             this->clients.erase(it);
+            break;
         }
         ++it;
     }
@@ -47,6 +48,7 @@ void    Channel::removeOperator(Client* oldOperator) {
     while(it != ite) {
         if (*it == oldOperator) {
             this->_operator.erase(it);
+            break;
         }
         ++it;
     }
@@ -76,6 +78,7 @@ void    Channel::removeWhitelist(std::string nick) {
     while(it != ite) {
         if (*it == nick) {
             this->_whitelist.erase(it);
+            break;
         }
         ++it;
     }
