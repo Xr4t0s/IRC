@@ -250,8 +250,10 @@ void Server::run() {
                     std::string& clientBuff = client->getOutBuff();
 
                     ssize_t tmp = send(fd, clientBuff.c_str(), clientBuff.size(), 0);
-                    if (tmp == -1)
-                        throw Error("Send Unexpected Error");
+                    if (tmp == -1) {
+                        _remove_client(fd);
+                        continue;
+                    }
                     clientBuff.erase(0, tmp);
                     
                     if (clientBuff.empty()) {
