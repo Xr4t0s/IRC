@@ -103,7 +103,7 @@ std::string Reply::inviteOnlyChan(Client& client, const std::string& channel) {
     return _serializeNumeric(
         473,
         (client.getNick().empty() ? "*" : client.getNick()) + " " + channel,
-        "You're not on that channel"
+        "Cannot join channel (+i)"
     );
 }
 
