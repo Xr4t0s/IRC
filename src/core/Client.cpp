@@ -1,6 +1,6 @@
 #include <core/Client.hpp>
 
-Client::Client(int fd) : _fd(fd), _hasPassword(false), _hasUsername(false), _hasNick(false), registered(false) {}
+Client::Client(int fd) : _fd(fd), hasPassword(false), hasUsername(false), hasNick(false), registered(false) {}
 
 std::string Client::extractCommand() {
     size_t index = _inBuff.find("\r\n");
@@ -33,7 +33,7 @@ const std::string& Client::getNick() const
 
 void Client::setNick(std::string newNick)
 {
-    _hasNick = true;
+    hasNick = true;
     _nick = newNick;
 }
 
@@ -44,7 +44,7 @@ const std::string& Client::getUser() const
 
 void Client::setUser(std::string newUser)
 {
-    _hasUsername = true;
+    hasUsername = true;
     _user = newUser;
 }
 

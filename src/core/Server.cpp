@@ -187,7 +187,7 @@ void Server::run() {
             
             // Si le fd concerné est notre serveur alors nous avons un nouveau client à gérer
             if (fd == _fd) {
-                std::cout << "New connection\n";
+                std::cout << "New client\n";
                 try {
                     _accept_client();
                 } catch (std::exception& e) {
@@ -237,15 +237,12 @@ void Server::run() {
                                 break ;
                         }
                         
-                        std::cout << buff << std::endl;
-                        
                         continue;
                     } else if (nread < 0) {
                         _remove_client(fd);
                         continue;
                     }
                 } else if (ev.events & EPOLLOUT) {
-                    std::cout << "EPOLLOUT" << std::endl;
                     Client* client = this->getClientByFd(fd);
                     if (!client)
                         throw Error("Server Misunderstood client");
@@ -323,7 +320,7 @@ bool    Server::createNewChannel(Client* client, std::string name, Channel newCh
     return true;
 }
 
-void        Server::remove_client(Client& client) {
+void        Server::removeClient(Client& client) {
     for (size_t i = 0; i < client.channels.size(); i++) {
         Channel* channel = client.channels[i];
         if (!channel)
@@ -341,8 +338,8 @@ void        Server::remove_client(Client& client) {
 }
 
 void        Server::deleteChannel(Channel * channel) {
-    for (size_t i = 0; i < channel->_clients.size(); i++)
-        channel->_clients[i]->removeChannel(channel);
+    for (size_t i = 0; i < channel->clients.size(); i++)
+        channel->clients[i]->removeChannel(channel);
     std::map<std::string, Channel>::iterator it = _channels.find(channel->getName());
     _channels.erase(it);
 }

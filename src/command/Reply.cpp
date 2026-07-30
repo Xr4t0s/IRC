@@ -11,16 +11,6 @@ std::string Reply::_serializeNumeric(int code, const std::string& target, const 
     return ret;
 }
 
-std::string Reply::_serializeBroadcast(int code, const std::string& target, const std::vector<std::string> params, const std::string& trailing) {
-    std::string ret = ":irc.server.net " + intToString(code) + " " + (target.empty() ? "*" : target)
-        + (trailing.empty() ? "\r\n" : " :" + trailing + "\r\n");
-    
-    // todo: imprimé les params ou supp la fonction
-    static_cast<void>(params);
-    
-    return ret;
-}
-
 std::string Reply::unknownCommand(Client& client, const std::string& command) {
     return _serializeNumeric(
         421,
@@ -150,42 +140,6 @@ std::string Reply::endOfNames(Client& client, const std::string& channel) {
     );
 }
 
-std::string Reply::relayJoin(Client& src, const std::string& channel) {
-    return ":" + src.getNick() + "!" + src.getUser() + "@localhost JOIN " + channel + "\r\n";
-}
-
-std::string Reply::relayTopic(Client& src, const std::string& channel, const std::string& topic) {
-    return ":" + src.getNick() + "!" + src.getUser() + "@localhost TOPIC " + channel + " :" + topic + "\r\n";
-}
-
-std::string Reply::relayPrivmsg(Client& src, const std::string& target, const std::string& text) {
-    return ":" + src.getNick() + "!" + src.getUser() + "@localhost PRIVMSG " + target + " :" + text + "\r\n";
-}
-
-std::string Reply::relayNick(Client& src, const std::string& oldNick, const std::string& newNick) {
-    return ":" + oldNick + "!" + src.getUser() + "@localhost NICK :" + newNick + "\r\n";
-}
-
-std::string Reply::relayKick(Client& src, const std::string& channel, const std::string& targetNick, const std::string& comment) {
-    return ":" + src.getNick() + "!" + src.getUser() + "@localhost KICK " + channel + " " + targetNick + " :" + comment + "\r\n";
-}
-
-std::string Reply::relayQuit(Client& src, const std::string& reason) {
-    return ":" + src.getNick() + "!" + src.getUser() + "@localhost QUIT :" + reason + "\r\n";
-}
-
-std::string Reply::relayPart(Client& src, const std::string& channel, const std::string& reason) {
-    std::string ret = ":" + src.getNick() + "!" + src.getUser() + "@localhost PART " + channel;
-    if (!reason.empty())
-        ret += " :" + reason;
-    ret += "\r\n";
-    return ret;
-}
-
-std::string Reply::relayInvite(Client& src, const std::string& targetNick, const std::string& channel) {
-    return ":" + src.getNick() + "!" + src.getUser() + "@localhost INVITE " + targetNick + " " + channel + "\r\n";
-}
-
 std::string Reply::noRecipient(Client& client, const std::string& command) {
     return _serializeNumeric(
         411,
@@ -274,16 +228,52 @@ std::string Reply::unknownMode(Client& client, char mode) {
     );
 }
 
-std::string Reply::relayMode(Client& src, const std::string& channel, const std::string& changes) {
-    return ":" + src.getNick() + "!" + src.getUser() + "@localhost MODE " + channel + " " + changes + "\r\n";
-}
-
 std::string Reply::badChannelKey(Client& client, const std::string& channel) {
     return _serializeNumeric(
         475,
         (client.getNick().empty() ? "*" : client.getNick()) + " " + channel,
         "Cannot join channel (+k)"
     );
+}
+
+std::string Reply::relayMode(Client& src, const std::string& channel, const std::string& changes) {
+    return ":" + src.getNick() + "!" + src.getUser() + "@localhost MODE " + channel + " " + changes + "\r\n";
+}
+
+std::string Reply::relayJoin(Client& src, const std::string& channel) {
+    return ":" + src.getNick() + "!" + src.getUser() + "@localhost JOIN " + channel + "\r\n";
+}
+
+std::string Reply::relayTopic(Client& src, const std::string& channel, const std::string& topic) {
+    return ":" + src.getNick() + "!" + src.getUser() + "@localhost TOPIC " + channel + " :" + topic + "\r\n";
+}
+
+std::string Reply::relayPrivmsg(Client& src, const std::string& target, const std::string& text) {
+    return ":" + src.getNick() + "!" + src.getUser() + "@localhost PRIVMSG " + target + " :" + text + "\r\n";
+}
+
+std::string Reply::relayNick(Client& src, const std::string& oldNick, const std::string& newNick) {
+    return ":" + oldNick + "!" + src.getUser() + "@localhost NICK :" + newNick + "\r\n";
+}
+
+std::string Reply::relayKick(Client& src, const std::string& channel, const std::string& targetNick, const std::string& comment) {
+    return ":" + src.getNick() + "!" + src.getUser() + "@localhost KICK " + channel + " " + targetNick + " :" + comment + "\r\n";
+}
+
+std::string Reply::relayQuit(Client& src, const std::string& reason) {
+    return ":" + src.getNick() + "!" + src.getUser() + "@localhost QUIT :" + reason + "\r\n";
+}
+
+std::string Reply::relayPart(Client& src, const std::string& channel, const std::string& reason) {
+    std::string ret = ":" + src.getNick() + "!" + src.getUser() + "@localhost PART " + channel;
+    if (!reason.empty())
+        ret += " :" + reason;
+    ret += "\r\n";
+    return ret;
+}
+
+std::string Reply::relayInvite(Client& src, const std::string& targetNick, const std::string& channel) {
+    return ":" + src.getNick() + "!" + src.getUser() + "@localhost INVITE " + targetNick + " " + channel + "\r\n";
 }
 
 Reply::~Reply() {}

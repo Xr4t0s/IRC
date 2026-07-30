@@ -68,13 +68,13 @@ Regroupé par phase, dans l'ordre logique d'implémentation.
 
 ## Phase 6 — Channels
 
-- [~] Classe `Channel` : membres, opérateurs, topic, clé, limite, modes
+- [x] Classe `Channel` : membres, opérateurs, topic, clé, limite, modes
 - [x] `JOIN` (créer/rejoindre, `RPL_NAMREPLY` 353, `RPL_ENDOFNAMES` 366)
 - [x] `PART` (quitter un channel)
 - [x] `PRIVMSG` vers un channel (broadcast aux membres) et vers un nick
 - [?] `NOTICE`
 - [x] `TOPIC` (voir / définir, `RPL_TOPIC` 332 / `RPL_NOTOPIC` 331)
-- [~] Broadcast propre (exclure l'émetteur quand il faut)
+- [x] Broadcast propre (exclure l'émetteur quand il faut)
 
 ## Phase 7 — Opérateurs & modes
 
@@ -90,9 +90,9 @@ Regroupé par phase, dans l'ordre logique d'implémentation.
 
 - [~] Tester avec un vrai client IRC de référence (irssi / HexChat)
 - [x] Tester données partielles (paquet coupé au milieu, `nc` avec pipes)
-- [ ] Aucune fuite mémoire (destruction propre clients/channels)
-- [ ] Nettoyer les `std::cout` de debug
-- [ ] Relire le sujet : fonctions autorisées (`docs/ALLOWED_FUNCTIONS.md`)
+- [x] Aucune fuite mémoire (destruction propre clients/channels)
+- [x] Nettoyer les `std::cout` de debug
+- [x] Relire le sujet : fonctions autorisées (`docs/ALLOWED_FUNCTIONS.md`)
 
 ## Bonus (optionnel)
 

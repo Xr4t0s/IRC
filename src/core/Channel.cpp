@@ -3,30 +3,29 @@
 
 Channel::Channel() : _name("Random name"), _topic(""), l(-1), i(false), t(true), k("") {}
 
-// Join command :
 Channel::Channel(Client * client, std::string name) : _name(name), _topic(""), l(-1), i(false), t(true), k("") {
-    _clients.push_back(client);
+    clients.push_back(client);
 }
 
 void    Channel::addClient(Client* newClient) {
-    this->_clients.push_back(newClient);
+    this->clients.push_back(newClient);
 }
 
 void    Channel::removeClient(Client* oldClient) {
-    std::vector<Client *>::iterator it = this->_clients.begin();
-    std::vector<Client *>::iterator ite = this->_clients.end();
+    std::vector<Client *>::iterator it = this->clients.begin();
+    std::vector<Client *>::iterator ite = this->clients.end();
 
     while(it != ite) {
         if (*it == oldClient) {
-            this->_clients.erase(it);
+            this->clients.erase(it);
         }
         ++it;
     }
 }
 
 Client* Channel::findClient(Client& client) {
-    std::vector<Client *>::iterator it = _clients.begin();
-    std::vector<Client *>::iterator ite = _clients.end();
+    std::vector<Client *>::iterator it = clients.begin();
+    std::vector<Client *>::iterator ite = clients.end();
 
     while (it != ite) {
         if ((*it)->getNick() == client.getNick()) {

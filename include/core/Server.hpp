@@ -25,25 +25,6 @@
 #include "command/CommandHandler.hpp"
 
 class Server {
-    public:
-        Server();
-        
-        bool        init(char **args);
-        void        run();
-
-        const       std::string& getPassword() const;
-        int getEfd() const;
-
-
-        Client*     getClientByFd(int fd);
-        Client*     getClientByNick(std::string nick);
-        Channel*    getChannelByName(const std::string& name);
-        bool        createNewChannel(Client* client, std::string name, Channel newChannel);
-        void        remove_client(Client& client);
-        void        deleteChannel(Channel * channel);
-
-        ~Server();
-
     private:
         int                             _fd;
         int                             _port;
@@ -52,15 +33,35 @@ class Server {
 
         std::map<int, Client>           _clients;
         std::map<std::string, Channel>  _channels;
-
         CommandHandler                  _cmdHandler;
 
-        void    _init_pass(char *pass);
-        void    _init_port(char *port);
-        void    _init_socket();
-        void    _init_listening();
-        void    _init_epoll();
+        void                            _init_pass(char *pass);
+        void                            _init_port(char *port);
+        void                            _init_socket();
+        void                            _init_listening();
+        void                            _init_epoll();
 
-        void    _accept_client();
-        void    _remove_client(int fd);
+        void                            _accept_client();
+        void                            _remove_client(int fd);
+
+    public:
+        Server();
+        
+        bool                            init(char **args);
+        void                            run();
+
+        int                             getEfd() const;
+        const std::string&              getPassword() const;
+
+
+        Client*                         getClientByFd(int fd);
+        Client*                         getClientByNick(std::string nick);
+        Channel*                        getChannelByName(const std::string& name);
+
+        bool                            createNewChannel(Client* client, std::string name, Channel newChannel);
+        void                            deleteChannel(Channel * channel);
+
+        void                            removeClient(Client& client);
+
+        ~Server();
 };
