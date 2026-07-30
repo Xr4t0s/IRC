@@ -350,16 +350,13 @@ void    Server::_accept_client() {
     socklen_t sock_len = sizeof(addr);
     // Puis on accepte le client avec accept(), ce qui crée un nouvel fd pour communiquer avec le client
     int client_fd = accept(_fd, reinterpret_cast<sockaddr*>(&addr), &sock_len);
-    if (client_fd == -1) {
-        std::cout << "Failed to accept client\n";
-        throw ;
-    }
+    if (client_fd == -1)
+        throw Error("Failed to accept client");
 
     // On passe le fd du nouveau client en mode non bloquant
     if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1) {
-        std::cout << "Failed to set client as non-blocking\n";
         close(client_fd);
-        throw ;
+        throw Error("Failed to set client as non-blocking");
     }
 
     // On crée la structure d'event à watch pour ce client
@@ -369,9 +366,8 @@ void    Server::_accept_client() {
 
     // On ajoute la structure dans notre watchlist
     if (epoll_ctl(_efd, EPOLL_CTL_ADD, client_fd, &cli_event) == -1) {
-        std::cout << "Failed to add client to watchlist\n";
         close(client_fd);
-        throw ;
+        throw Error("Failed to add client to watchlist");
     }
     
     Client client(client_fd);
