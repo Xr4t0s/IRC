@@ -8,9 +8,9 @@ void CommandHandler::_privmsg(Client& client, const Command& cmd) {
         return client.fillOutBuffer(Reply::notRegistered(client).c_str(), _server.getEfd());
 
     if (cmd.params.size() < 1)
-        client.fillOutBuffer(Reply::noRecipient(client, cmd.command).c_str(), _server.getEfd());
+        return client.fillOutBuffer(Reply::noRecipient(client, cmd.command).c_str(), _server.getEfd());
     if (cmd.params.size() < 2 || cmd.params[1].empty())
-        client.fillOutBuffer(Reply::noTextToSend(client).c_str(), _server.getEfd());
+        return client.fillOutBuffer(Reply::noTextToSend(client).c_str(), _server.getEfd());
     
     std::vector<std::string> tmp = splitBy(cmd.params[0], ',');
     std::vector<std::string>::iterator it = tmp.begin();
