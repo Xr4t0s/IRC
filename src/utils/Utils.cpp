@@ -7,6 +7,10 @@
 
 std::string intToString(int nb) {
     std::ostringstream oss;
+    if (nb < 10)
+        oss << "00";
+    else if (nb < 100)
+        oss << "0";
     oss << nb;
     return oss.str();
 }
