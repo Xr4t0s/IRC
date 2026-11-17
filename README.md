@@ -84,14 +84,27 @@ The server decides:
 ```
 IRC/
 ├── Makefile
+├── include/                 # headers, same layout as src/
 ├── src/
-├── include/
-├── README.md
-├── TASKS.md
-├── USER_DOC.md
-└── DEV_DOC.md
+│   ├── main.cpp             # entry point, SIGINT handling
+│   ├── core/
+│   │   ├── Server.cpp       # socket setup, single poll() event loop, client I/O buffers
+│   │   ├── Client.cpp       # per-connection state: auth, nick/user, read/write buffers
+│   │   └── Channel.cpp      # members, operators, topic, modes (i, t, k, o, l)
+│   ├── command/
+│   │   ├── Command.cpp      # parses a raw IRC line into prefix / command / params
+│   │   ├── CommandHandler.cpp  # dispatches each command to its handler
+│   │   ├── Reply.cpp        # numeric replies (RPL_* / ERR_*)
+│   │   └── handlers/        # PASS, NICK, USER, JOIN, PART, PRIVMSG, KICK, INVITE, TOPIC, MODE, QUIT
+│   └── utils/
+└── docs/                    # user doc, dev doc, parsing notes, one page per command
 ```
-TODO! Explain each parts 
+
+- **Server** owns every socket and runs the only `poll()` loop: it accepts new clients, reads into per-client buffers, and only writes when the socket is ready.
+- **Command** turns complete `\r\n`-terminated lines into structured messages, then **CommandHandler** routes them to the matching handler.
+- **Channel** enforces permissions (operators, invite-only, key, user limit) before a message is forwarded to its members.
+
+See [`docs/DEV_DOC.md`](docs/DEV_DOC.md) for internals and [`docs/commands/`](docs/commands) for each command.
 
 ## Requirements
 
@@ -136,3 +149,29 @@ The subject has several requirements that we will explain here:
             - `o`: give/take channel operator privilege.
 
             - `l`: set/remove the user limit of the channel.
+
+## Build & run
+
+```bash
+make
+./ircserv <port> <password>      # e.g. ./ircserv 6667 secret
+```
+
+Connect with any IRC client (we used **HexChat** as the reference client) or test by hand with `nc`:
+
+```bash
+nc -C 127.0.0.1 6667
+PASS secret
+NICK alice
+USER alice 0 * :Alice
+JOIN #42
+PRIVMSG #42 :hello
+```
+
+More details in [`docs/USER_DOC.md`](docs/USER_DOC.md).
+
+## Authors
+
+- **nitadros** ([@Xr4t0s](https://github.com/Xr4t0s))
+- **engiacom**
+- **rkerman**
